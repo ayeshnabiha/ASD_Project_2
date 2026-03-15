@@ -18,7 +18,8 @@ void userLogin(){
 }
 
 void addNewReservation(){
-    string name, purpose, duration, date; 
+    string name, duration, date; 
+    char purpose;
 
     
     this_thread::sleep_for(chrono::seconds(1));
@@ -26,14 +27,26 @@ void addNewReservation(){
     cout << "\nEnter your name: ";
     cin >> name;
 
+    cout << "Purpose" << endl;
+    cout << "1. Praktikum" << endl;
+    cout << "2. Pelatihan" << endl;
+    cout << "3. Other" << endl;
     cout << "Enter the purpose of reservation: ";
     cin >> purpose;
+    while(purpose != '1' || '2' || '3'){
+        cout << "Invalid! Please enter one of the option above : ";
+        cin >> purpose;
+    }
 
     cout << "Enter the duration of reservation (in hours): ";
     cin >> duration;
 
-    cout << "Enter the date of reservation (YYYY-MM-DD): ";
+    cout << "Enter the date of reservation (YYYYMMDD): ";
     cin >> date;
+    while(date.length() != 8){
+        cout << "Invalid date format. Please enter the date in YYYYMMDD format : ";
+        cin >> date;
+   }
 
     cout << "\nAdding new reservation";
     this_thread::sleep_for(chrono::seconds(1));
@@ -44,7 +57,7 @@ void addNewReservation(){
     cout << " .";
     this_thread::sleep_for(chrono::seconds(2));
     cout << "\nReservation added successfully!" << endl;
-    
+
 }
 
 void showReservationQueue(){
