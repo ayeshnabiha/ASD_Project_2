@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab Reservation System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1>Computer Laboratory Reservation System</h1>
+            <!-- Pseudo Login Section -->
+            <div id="login-section">
+                <p>Enter your NIU to login:</p>
+                <input type="text" id="login-niu" placeholder="Enter NIU (6 digits)" maxlength="6">
+                <button onclick="login()">Login</button>
+            </div>
+            <!-- Logged in info -->
+            <div id="user-info" class="hidden">
+                <span>Logged in as NIU: </span>
+                <strong id="current-niu"></strong>
+                <button onclick="logout()" class="secondary">Logout</button>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav>
+            <button onclick="showPage('add')" id="nav-add">Add Reservation</button>
+            <button onclick="showPage('queue')" id="nav-queue">Queue View (FIFO)</button>
+            <button onclick="showPage('history')" id="nav-history">History (LIFO)</button>
+        </nav>
+
+        <!-- Page: Add Reservation -->
+        <section id="page-add" class="page">
+            <h2>Add New Reservation</h2>
+            
+            <form id="reservation-form" onsubmit="submitReservation(event)">
+                <div class="form-group">
+                    <label>Group Name:</label>
+                    <input type="text" id="group-name" required placeholder="e.g., Kelompok 1">
+                </div>
+
+                <div class="form-group">
+                    <label>NIU:</label>
+                    <input type="text" id="niu" required placeholder="6-digit NIU" maxlength="6" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label>Date:</label>
+                    <input type="date" id="date" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Start Time:</label>
+                        <input type="time" id="start-time" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>End Time:</label>
+                        <input type="time" id="end-time" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Purpose:</label>
+                    <select id="purpose" required>
+                        <option value="">Select purpose</option>
+                        <option value="Praktikum">Praktikum</option>
+                        <option value="Pelatihan">Pelatihan</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <button type="submit">Submit Reservation</button>
+            </form>
+
+            <div id="form-message"></div>
+        </section>
+
+        <!-- Page: Queue View (FIFO) -->
+        <section id="page-queue" class="page hidden">
+            <h2>Queue View (FIFO - First In First Out)</h2>
+            <p class="info">Reservations are processed in order. First item = Front of Queue.</p>
+            
+            <table id="queue-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Group Name</th>
+                        <th>NIU</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Purpose</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="queue-body">
+                </tbody>
+            </table>
+            <div id="queue-message"></div>
+        </section>
+
+        <!-- Page: History View (LIFO) -->
+        <section id="page-history" class="page hidden">
+            <h2>History View (LIFO - Last In First Out)</h2>
+            <p class="info">Stack behavior: Most recent reservation appears first.</p>
+            <p class="info">Login required to view your history.</p>
+            
+            <table id="history-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Group Name</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Purpose</th>
+                        <th>Status</th>
+                        <th>Note</th>
+                    </tr>
+                </thead>
+                <tbody id="history-body">
+                </tbody>
+            </table>
+            <div id="history-message"></div>
+        </section>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
