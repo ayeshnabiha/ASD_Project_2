@@ -3,13 +3,15 @@
 
 #include "linkedList.h"
 
+typedef LinkedList Queue;
+
 // Function for FIFO 
-void enqueue(Node*& head, const Reservation& data);
+void enqueue(Queue &queue, const Reservation &data);
 
 // Function to remove the front element of the queue
-void dequeue(Node*& head);
+Node* dequeue(Queue &queue);
 
 // Display the queue
-void showQueue(Node* head);
+void showQueue(const Queue &queue);
 
 #endif

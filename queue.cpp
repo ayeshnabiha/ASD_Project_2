@@ -1,24 +1,29 @@
 #include "queue.h"
+#include "linkedList.h"
 #include <iostream>
 using namespace std;
 
-// Functions implementation, mainly using linked list functions xixixi
-void enqueue(Node*& head, const Reservation& data){
-    insertEnd(head, data);
+// Enqueue: tambah data ke belakang (FIFO)
+void enqueue(Queue &queue, const Reservation &data)
+{
+    Node* newNode = createNode(data);
+    insertEnd(queue, newNode);
 }
 
-void dequeue(Node*& head){
-    if(isEmpty(head)){
+// Dequeue: hapus data dari depan (FIFO)
+Node* dequeue(Queue &queue)
+{
+    if (isEmpty(queue))
+    {
         cout << "Queue kosong!" << endl;
-        return;
+        return nullptr;
     }
-    deleteFront(head);
+
+    return deleteFront(queue);
 }
 
-void showQueue(Node* head){
-    if(isEmpty(head)){
-        cout << "Queue kosong!" << endl;
-        return;
-    }
-    displayList(head);
+// Menampilkan isi queue
+void showQueue(const Queue &queue)
+{
+    displayList(queue, "Queue (FIFO)");
 }
