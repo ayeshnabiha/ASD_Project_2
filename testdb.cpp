@@ -56,4 +56,11 @@ int main() {
     // close
     closeDatabase(db);
     return 0;
+
+    Node* found = getReservationByNIU(db, "123456");
+    if (found == nullptr) {
+        cout << "Reservasi tidak ditemukan." << endl;
+    } else {
+        printNode(found, 0);
+    }
 }
