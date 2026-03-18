@@ -5,21 +5,26 @@ using namespace std;
 int main() {
     sqlite3* db;
 
-    // Test init
+    // init
     if (!initDatabase(&db)) {
         cerr << "Init failed" << endl;
         return 1;
     }
 
-    // Test save
-    Node* testNode = createNode("Kelompok A", "123456",
-                                18, 3, 2026, "Meeting", 60,
-                                9, 0, 10, 0, "pending");
-    if (saveReservation(db, testNode)) {
-        cout << "Save successful" << endl;
-    }
+    Reservation r;
+    r.group_name = "Kelompok A";
+    r.niu = "123456";
+    r.date_day = 18; r.date_month = 3; r.date_year = 2026;
+    r.purpose = "Meeting";
+    r.duration = 60;
+    r.time_start_hour = 9; r.time_start_minutes = 0;
+    r.time_stop_hour = 10; r.time_stop_minutes = 0;
+    r.status = "Pending";
 
-    // Test load
+    // save
+    Node* testNode = createNode(r);
+
+    // load
     Node* loaded = loadReservations(db);
     Node* curr = loaded;
     while (curr != nullptr) {
@@ -29,12 +34,12 @@ int main() {
         curr = curr->next;
     }
 
-    // Test update
+    // update
     if (updateStatus(db, "123456", "approved")) {
         cout << "Update successful" << endl;
     }
 
-    // Load again to verify update
+    // load lagi utk cek update
     loaded = loadReservations(db);
     curr = loaded;
     while (curr != nullptr) {
@@ -43,6 +48,7 @@ int main() {
         curr = curr->next;
     }
 
+    // close
     closeDatabase(db);
     return 0;
 }

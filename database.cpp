@@ -88,7 +88,7 @@ bool saveReservation(sqlite3* db, Node* node) {
 }
 
 
-// load reservatins from database 
+// load reservatins from 
 Node* loadReservations(sqlite3* db) {
     const char* selectSQL = "SELECT niu, group_name, date_day, date_month, date_year, "
                             "purpose, duration, time_start_hour, time_start_minutes, "
@@ -106,22 +106,21 @@ Node* loadReservations(sqlite3* db) {
     Node* tail = nullptr;
 
     while (sqlite3_step(stmt) == SQLITE_ROW) {
-        std::string niu        = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
-        std::string group_name = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
-        int date_day           = sqlite3_column_int(stmt, 2);
-        int date_month         = sqlite3_column_int(stmt, 3);
-        int date_year          = sqlite3_column_int(stmt, 4);
-        std::string purpose    = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 5));
-        int duration           = sqlite3_column_int(stmt, 6);
-        int time_start_hour    = sqlite3_column_int(stmt, 7);
-        int time_start_min     = sqlite3_column_int(stmt, 8);
-        int time_stop_hour     = sqlite3_column_int(stmt, 9);
-        int time_stop_min      = sqlite3_column_int(stmt, 10);
-        std::string status     = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 11));
+        Reservation r;
+        r.niu                = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+        r.group_name         = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
+        r.date_day           = sqlite3_column_int(stmt, 2);
+        r.date_month         = sqlite3_column_int(stmt, 3);
+        r.date_year          = sqlite3_column_int(stmt, 4);
+        r.purpose            = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 5));
+        r.duration           = sqlite3_column_int(stmt, 6);
+        r.time_start_hour    = sqlite3_column_int(stmt, 7);
+        r.time_start_minutes = sqlite3_column_int(stmt, 8);
+        r.time_stop_hour     = sqlite3_column_int(stmt, 9);
+        r.time_stop_minutes  = sqlite3_column_int(stmt, 10);
+        r.status             = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 11));
 
-        Node* newNode = createNode(group_name, niu, date_day, date_month, date_year,
-                                   purpose, duration, time_start_hour, time_start_min,
-                                   time_stop_hour, time_stop_min, status);
+        Node* newNode = createNode(r);
 
         if (head == nullptr) {
             head = newNode;
@@ -134,29 +133,4 @@ Node* loadReservations(sqlite3* db) {
 
     sqlite3_finalize(stmt);
     return head;
-}
-
-bool updateStatus(sqlite3* db, const std::string& niu, const std::string& status) {
-    const char* updateSQL = "UPDATE reservations SET status = ? WHERE niu = ?;";
-
-    sqlite3_stmt* stmt;
-    int rc = sqlite3_prepare_v2(db, updateSQL, -1, &stmt, nullptr);
-
-    if (rc != SQLITE_OK) {
-        std::cerr << "Failed to prepare update statement: " << sqlite3_errmsg(db) << std::endl;
-        return false;
-    }
-
-    sqlite3_bind_text(stmt, 1, status.c_str(), -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 2, niu.c_str(), -1, SQLITE_STATIC);
-
-    rc = sqlite3_step(stmt);
-    sqlite3_finalize(stmt);
-
-    if (rc != SQLITE_DONE) {
-        std::cerr << "Failed to update status: " << sqlite3_errmsg(db) << std::endl;
-        return false;
-    }
-
-    return true;
 }
