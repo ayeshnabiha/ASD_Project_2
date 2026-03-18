@@ -10,8 +10,8 @@ bool initDatabase(sqlite3** db, const std::string& filename = "reservations.db")
 void closeDatabase(sqlite3* db);
 
 // operations
-bool saveReservation(sqlite3* db, const Node* node);
-bool updateStatus(sqlite3* db, const std::string& niu, const std::string& niu, const std::string& status);
+bool saveReservation(sqlite3* db, Node* node);
+bool updateStatus(sqlite3* db, const std::string& niu, const std::string& status);
 
 //load on startup -> returns plain linked list
 Node* loadReservations(sqlite3* db);

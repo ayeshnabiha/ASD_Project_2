@@ -1,4 +1,4 @@
-#include "linkedlist.h"
+#include "linkedList.h"
 
 // Function Implementation
 Node *createNode(std::string group_name, std::string niu,
