@@ -134,3 +134,28 @@ Node* loadReservations(sqlite3* db) {
     sqlite3_finalize(stmt);
     return head;
 }
+
+bool updateStatus(sqlite3* db, const std::string& niu, const std::string& status) {
+    const char* updateSQL = "UPDATE reservations SET status = ? WHERE niu = ?;";
+
+    sqlite3_stmt* stmt;
+    int rc = sqlite3_prepare_v2(db, updateSQL, -1, &stmt, nullptr);
+
+    if (rc != SQLITE_OK) {
+        std::cerr << "Failed to prepare update statement: " << sqlite3_errmsg(db) << std::endl;
+        return false;
+    }
+
+    sqlite3_bind_text(stmt, 1, status.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 2, niu.c_str(), -1, SQLITE_STATIC);
+
+    rc = sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+
+    if (rc != SQLITE_DONE) {
+        std::cerr << "Failed to update status: " << sqlite3_errmsg(db) << std::endl;
+        return false;
+    }
+
+    return true;
+}

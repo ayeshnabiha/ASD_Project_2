@@ -23,6 +23,11 @@ int main() {
 
     // save
     Node* testNode = createNode(r);
+    if (saveReservation(db, testNode)) {
+     cout << "Save successful" << endl;
+    } else {
+        cout << "Save failed" << endl;
+    }
 
     // load
     Node* loaded = loadReservations(db);
@@ -35,7 +40,7 @@ int main() {
     }
 
     // update
-    if (updateStatus(db, "123456", "approved")) {
+    if (updateStatus(db, "123456", "Accepted")) {
         cout << "Update successful" << endl;
     }
 
