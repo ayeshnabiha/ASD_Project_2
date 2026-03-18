@@ -16,4 +16,13 @@ bool updateStatus(sqlite3* db, const std::string& niu, const std::string& status
 //load on startup -> returns plain linked list
 Node* loadReservations(sqlite3* db);
 
+// clear db
+bool clearDatabase(sqlite3* db);
+
+// conflict check
+bool hasTimeConflict(sqlite3* db, const Reservation& r);
+
+// filters
+Node* getReservationByNIU(sqlite3* db, const std::string& niu);
+
 #endif
