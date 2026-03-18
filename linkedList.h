@@ -18,7 +18,7 @@ struct Reservation
     int time_start_minutes;
     int time_stop_hour;
     int time_stop_minutes;
-    std::string status; // "Pending", "Accepted", "Cancel"
+    std::string status; // "Pending", "Accepted", "Cancelled"
 };
 
 // Struct for Linked List Mechanism
