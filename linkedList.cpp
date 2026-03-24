@@ -103,12 +103,12 @@ void printNode(const Node *node, int nomor)
          << setfill('0') << setw(2) << r.time_stop_hour << ":"
          << setfill('0') << setw(2) << r.time_stop_minutes
          << "  (" << r.duration << " mnt)\n";
-    cout << "   Status      : " << r.status << "\n";
+    cout << "   Status       : " << r.status << "\n";
 }
 
 void displayList(const LinkedList &list, const string &label)
 {
-    cout << "\n" << string(15, '=') << " " << label << " " << string(25, '=') << "\n";
+    cout << "\n" << string(15, '=') << " " << label << " " << string(15, '=') << "\n";
     cout << string(50, '-') << "\n";
 
     if (isEmpty(list))

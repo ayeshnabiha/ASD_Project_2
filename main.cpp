@@ -98,7 +98,7 @@ void displayMenuOrLogout(Reservation &user, Queue &list, sqlite3* db){
     } else if(menu == 3){
         showReservationHistory(user, list, db);
     } else if(menu == 4){
-        cout << "\nLogging out"; 
+        cout << "Logging out"; 
         for(int i = 0; i < 3; i++){
             this_thread::sleep_for(chrono::milliseconds(500));
             cout << ".";
@@ -245,5 +245,8 @@ void continueOrLogout(Reservation &user, Queue &list, sqlite3* db){
         //freeList(queue);
         return; 
     }
-    else{displayMenuOrLogout(user, list, db);}
+    else{
+        cout << endl;
+        displayMenuOrLogout(user, list, db);
+    }
 }
