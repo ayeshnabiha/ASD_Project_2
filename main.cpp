@@ -6,27 +6,32 @@
 #include "linkedList.h"
 #include "queue.h"
 #include "validation.h"
-
+#include "database.h"
 
 using namespace std;
 
 void userLogin(Reservation &user);
-void displayMenu(Reservation &user, Queue &queue);
-void displayMenuOrLogout(Reservation &user, Queue &queue);
-void addNewReservation(Reservation &user, Queue &queue);
-void showReservationQueue(Reservation &user, Queue &queue);
-void showReservationHistory(Reservation &user, Queue &queue);
-void showReservationDetails();
-void continueOrLogout(Reservation &user, Queue &queue);
-void backToMenuOrLogout(Reservation &user, Queue &queue);
+void displayMenu(Reservation &user, Queue &list, sqlite3* db);
+void displayMenuOrLogout(Reservation &user, Queue &list, sqlite3* db);
+void addNewReservation(Reservation &user, Queue &list, sqlite3* db);
+void showReservationQueue(Reservation &user, Queue &list, sqlite3* db);
+void showReservationHistory(Reservation &user, Queue &list, sqlite3* db);
+void showReservationDetails(Reservation &user, Queue &list, sqlite3* db);
+void continueOrLogout(Reservation &user, Queue &list, sqlite3* db);
 
 int main(){
     Reservation user;
-    Queue queue;
-    // userLogin(user);
-    // displayMenu(user, queue);
-    addNewReservation(user, queue);
-    // showReservationQueue(user, queue);
+    Queue list;
+    sqlite3* db;
+    
+    initList(list);
+    initDatabase(&db, "reservations.db");
+
+    userLogin(user);
+    displayMenu(user, list, db);
+
+    //freeList(list);
+    closeDatabase(db);
 
     return 0;
 }
@@ -34,8 +39,8 @@ int main(){
 void userLogin(Reservation &user){
     cout << "Welcome to Computer Laboratory Reservation System!" << endl;
     this_thread::sleep_for(chrono::seconds(1)); 
-    
-    cout << "Please enter your NIU: ";
+    cout << string(50, '-') << "\n";
+    cout << "Please enter your 6-digit NIU: ";
     
     cin >> user.niu;
     while(user.niu.length() != 6){
@@ -49,35 +54,34 @@ void userLogin(Reservation &user){
     */
 }
 
-void displayMenu(Reservation &user, Queue &queue){
+void displayMenu(Reservation &user, Queue &list, sqlite3* db){
     int menu;
     
     this_thread::sleep_for(chrono::seconds(1)); 
-    
-    cout << "\nMenu" << endl;
-
+    cout << string(50, '-') << "\n";
+    cout << "Menu" << endl;
     cout << "1. Add new reservation" << endl;
     cout << "2. Show reservation queue" << endl;
     cout << "3. Show reservation history" << endl;
     
     cout << "\nPlease select an option : ";
-
     cin >> menu;
 
+    cout << string(50, '-') << "\n";
+
     if(menu == 1){
-        addNewReservation(user, queue);
+        addNewReservation(user, list, db);
     } else if(menu == 2){
-        showReservationQueue(user, queue);}
+        showReservationQueue(user, list, db);}
     // } else if(menu == 3){
     //     showReservationHistory();
     // }
 }
 
-void displayMenuOrLogout(Reservation &user, Queue &queue){
-    char menu;
+void displayMenuOrLogout(Reservation &user, Queue &list, sqlite3* db){
+    int menu;
 
-    cout << "\nMenu" << endl;
-
+    cout << "Menu" << endl;
     cout << "1. Add new reservation" << endl;
     cout << "2. Show reservation queue" << endl;
     cout << "3. Show reservation history" << endl;
@@ -85,57 +89,56 @@ void displayMenuOrLogout(Reservation &user, Queue &queue){
     
     cout << "\nPlease select an option : ";
     cin >> menu;
+    cout << string(50, '-') << "\n";
 
     if(menu == 1){
-        addNewReservation(user, queue);
+        addNewReservation(user, list, db);
     } else if(menu == 2){
-        showReservationQueue(user, queue);}
-    // } else if(menu == 3){
-    //     showReservationHistory();
-    // } else if(menu == 4){
-    //     cout << "\nLogging out"; 
-    //     this_thread::sleep_for(chrono::seconds(1));
-    //     cout << ".";
-    //     this_thread::sleep_for(chrono::seconds(1));
-    //     cout << ". ";
-    //     this_thread::sleep_for(chrono::seconds(1));
-    //     cout << ". ";
-    //     this_thread::sleep_for(chrono::seconds(2));
-    //     cout << "\nLogged out successfully!" << endl;
-    //     exit(0);
-    // }
+        showReservationQueue(user, list, db);
+    } else if(menu == 3){
+        showReservationHistory(user, list, db);
+    } else if(menu == 4){
+        cout << "\nLogging out"; 
+        for(int i = 0; i < 3; i++){
+            this_thread::sleep_for(chrono::milliseconds(500));
+            cout << ".";
+        }
+        this_thread::sleep_for(chrono::seconds(1));
+        cout << "\nLogged out successfully!" << endl;
+        return;
+    }
 }
 
-void addNewReservation(Reservation &user, Queue &queue){
+void addNewReservation(Reservation &user, Queue &list, sqlite3* db){
     char confirm, dash1, dash2;
     
     this_thread::sleep_for(chrono::seconds(1));
 
-    cout << "\nEnter your group name: ";
+    cout << "Enter your group name: ";
     cin >> user.group_name;
 
-    cout << "Purpose" << endl;
+    cout << "\nPurpose" << endl;
     cout << "1. Praktikum" << endl;
     cout << "2. Pelatihan" << endl;
     cout << "3. Other" << endl;
     cout << "Enter the purpose of reservation: ";
     cin >> user.purpose;
 
-    while(user.purpose != '1' && user.purpose != '2' && user.purpose != '3'){
-        cout << "Invalid! Please enter one of the option above : ";
+    while(user.purpose != 1 && user.purpose != 2 && user.purpose != 3){
+        cout << "Invalid! Please enter one of the option above: ";
         cin >> user.purpose;
     }
 
-    cout << "Enter the duration of reservation (in minutes): ";
+    cout << "\nEnter the duration of reservation (in minutes): ";
     cin >> user.duration;
 
-    cout << "Enter the start time of reservation (HH:MM): ";
+    cout << "\nEnter the start time of reservation (HH:MM): ";
     cin >> user.time_start_hour >> dash1 >> user.time_start_minutes;
 
     user.time_stop_hour = user.time_start_hour + (user.duration / 60);
     user.time_stop_minutes = user.time_start_minutes + (user.duration % 60);
 
-    cout << "Enter the date of reservation (DD-MM-YYYY): ";
+    cout << "\nEnter the date of reservation (DD-MM-YYYY): ";
     cin >> user.date_day >> dash1 >> user.date_month >> dash2 >> user.date_year;
 
     while(!isValidDate(user.date_day, user.date_month, user.date_year) || 
@@ -152,11 +155,12 @@ void addNewReservation(Reservation &user, Queue &queue){
         user.time_stop_hour = user.time_start_hour + (user.duration / 60);
         user.time_stop_minutes = user.time_start_minutes + (user.duration % 60);
 
-        cout << "Enter the date of reservation (YYYY-MM-DD): ";
-        cin >> user.date_year >> dash1 >> user.date_month >> dash2 >> user.date_day;
+        cout << "Enter the date of reservation (DD-MM-YYYY): ";
+        cin >> user.date_day >> dash1 >> user.date_month >> dash2 >> user.date_year;
     }
 
-    cout << "\nPlease check your reservation details" << endl;
+    cout << string(50, '-') << endl;
+    cout << "Please check your reservation details" << endl;
     cout << "Name       : " << user.group_name << endl;
     cout << "Purpose    : " << (user.purpose == '1' ? "Praktikum" : (user.purpose == '2' ? "Pelatihan" : "Other")) << endl;
     cout << "Schedule   : " << user.time_start_hour << ":" << user.time_start_minutes << " - " << user.time_stop_hour << ":" << user.time_stop_minutes << endl;
@@ -172,81 +176,74 @@ void addNewReservation(Reservation &user, Queue &queue){
     }
 
     if(confirm == 'N'|| confirm == 'n'){
-        addNewReservation(user, queue);
+        addNewReservation(user, list, db);
     }
     else if (confirm == 'Y' || confirm == 'y'){
         cout << "\nChecking available time slots";
-        //call database function to check available time slots
+
+        hasTimeConflict(db, user);
+        loadReservations(db);
+        saveReservation(db, createNode(user));
+        updateStatus(db, user.niu, "Accepted");
+        enqueue(list, user);
 
         this_thread::sleep_for(chrono::seconds(1));
         cout << "\nAdding new reservation";
+        for(int i = 0; i < 3; i++){
+            this_thread::sleep_for(chrono::milliseconds(500));
+            cout << ".";
+        }
         this_thread::sleep_for(chrono::seconds(1));
-        cout << ". ";
-        this_thread::sleep_for(chrono::seconds(1));
-        cout << ". ";
-        this_thread::sleep_for(chrono::seconds(1));
-        cout << ". ";
-        this_thread::sleep_for(chrono::seconds(2));
         cout << "\nReservation added successfully!" << endl;
+        cout << string(50, '-') << endl;
+        this_thread::sleep_for(chrono::seconds(1));
 
         // showReservationDetails();
-        continueOrLogout(user, queue);
+        continueOrLogout(user, list, db);
     }
 }
 
-void showReservationQueue(Reservation &user, Queue &queue){
-    showQueue(queue); 
-    backToMenuOrLogout(user, queue);
+void showReservationQueue(Reservation &user, Queue &list, sqlite3* db){
+    showQueue(list); 
+    continueOrLogout(user, list, db);
 }
 
-void showReservationHistory(Reservation &user, Queue &queue){
-    //call stack function
+void showReservationHistory(Reservation &user, Queue &list, sqlite3* db){
+    // getReservationByNIU(db, user.niu);
 
-    backToMenuOrLogout(user, queue);
+    continueOrLogout(user, list, db);
 }
 
-void showReservationDetails(){
+void showReservationDetails(Reservation &user, Queue &list, sqlite3* db){
     //call stack function to show reservation details
+
+    continueOrLogout(user, list, db);
 }
 
-void continueOrLogout(Reservation &user, Queue &queue){
+void continueOrLogout(Reservation &user, Queue &list, sqlite3* db){
     char choice;
 
-    cout << "\nDo you want to continue? (Y/N): ";
+    cout << "Do you want to continue? (Y/N): ";
     cin >> choice;
 
     while(choice != 'Y' && choice != 'y' && choice != 'N' && choice != 'n'){
         cout << "Invalid input! Please enter Y or N." << endl;
         cout << "\nDo you want to continue? (Y/N): ";
         cin >> choice;
+        cout << string(50, '-') << "\n";
     }
 
     if(choice == 'N' || choice == 'n'){
         cout << "\nLogging out"; 
-        this_thread::sleep_for(chrono::seconds(1));
-        cout << ". ";
-        this_thread::sleep_for(chrono::seconds(1));
-        cout << ". ";
-        this_thread::sleep_for(chrono::seconds(1));
-        cout << ". ";
+        for(int i = 0; i < 3; i++){
+            this_thread::sleep_for(chrono::milliseconds(500));
+            cout << ".";
+        }
         this_thread::sleep_for(chrono::seconds(2));
         cout << "\nLogged out successfully!" << endl;
-        exit(0);
+        cout << string(50, '-') << endl;
+        //freeList(queue);
+        return; 
     }
-    else{displayMenuOrLogout(user, queue);}
-}
-    
-void backToMenuOrLogout(Reservation &user, Queue &queue){
-    char choice;
-
-    cout << "\nDo you want to go back to menu? (Y/N): ";
-    cin >> choice;
-
-    while(choice != 'Y' && choice != 'y' && choice != 'N' && choice != 'n'){
-        cout << "Invalid input! Please enter Y or N." << endl;
-        cout << "\nDo you want to go back to menu? (Y/N): ";
-        cin >> choice;
-    }
-
-    if(choice == 'N' || choice == 'n'){displayMenuOrLogout(user, queue);}
+    else{displayMenuOrLogout(user, list, db);}
 }

@@ -16,7 +16,7 @@ bool initDatabase(sqlite3** db, const std::string& filename) {
             date_day INTEGER,
             date_month INTEGER,
             date_year INTEGER,
-            purpose TEXT,
+            purpose INTEGER,
             duration INTEGER,
             time_start_hour INTEGER,
             time_start_minutes INTEGER,
@@ -36,13 +36,13 @@ bool initDatabase(sqlite3** db, const std::string& filename) {
         return false;
     }
 
-    std::cout << "Database initialized successfully." << std::endl;
+    // std::cout << "Database initialized successfully." << std::endl;
     return true;
 }
 
 void closeDatabase(sqlite3* db) {
     sqlite3_close(db);
-    std::cout << "Database closed." << std::endl;
+    // std::cout << "Database closed." << std::endl;
 }
 
 bool saveReservation(sqlite3* db, Node* node) {
@@ -64,7 +64,7 @@ bool saveReservation(sqlite3* db, Node* node) {
     sqlite3_bind_int(stmt, 3, node->data.date_day);
     sqlite3_bind_int(stmt, 4, node->data.date_month);
     sqlite3_bind_int(stmt, 5, node->data.date_year);
-    sqlite3_bind_text(stmt, 6, node->data.purpose.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_int(stmt, 6, node->data.purpose);    
     sqlite3_bind_int(stmt, 7, node->data.duration);
     sqlite3_bind_int(stmt, 8, node->data.time_start_hour);
     sqlite3_bind_int(stmt, 9, node->data.time_start_minutes);
@@ -106,7 +106,7 @@ Node* loadReservations(sqlite3* db) {
         r.date_day           = sqlite3_column_int(stmt, 2);
         r.date_month         = sqlite3_column_int(stmt, 3);
         r.date_year          = sqlite3_column_int(stmt, 4);
-        r.purpose            = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 5));
+        r.purpose            = sqlite3_column_int(stmt, 5);    
         r.duration           = sqlite3_column_int(stmt, 6);
         r.time_start_hour    = sqlite3_column_int(stmt, 7);
         r.time_start_minutes = sqlite3_column_int(stmt, 8);
@@ -152,7 +152,7 @@ Node* getReservationsByNIU(sqlite3* db, const std::string& niu) {
         r.date_day           = sqlite3_column_int(stmt, 2);
         r.date_month         = sqlite3_column_int(stmt, 3);
         r.date_year          = sqlite3_column_int(stmt, 4);
-        r.purpose            = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 5));
+        r.purpose            = sqlite3_column_int(stmt, 5);    
         r.duration           = sqlite3_column_int(stmt, 6);
         r.time_start_hour    = sqlite3_column_int(stmt, 7);
         r.time_start_minutes = sqlite3_column_int(stmt, 8);

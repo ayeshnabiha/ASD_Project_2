@@ -92,10 +92,10 @@ void printNode(const Node *node, int nomor)
         cout << "   ";
 
     cout << r.group_name << " (" << r.niu << ")\n";
-    cout << "   Keperluan : " << r.purpose << "\n";
-    cout << "   Jadwal    : "
-         << setfill('0') << setw(2) << r.date_day << "/"
-         << setfill('0') << setw(2) << r.date_month << "/"
+    cout << "   Purpose      : " << r.purpose << "\n";
+    cout << "   Schedule     : "
+         << setfill('0') << setw(2) << r.date_day << "-"
+         << setfill('0') << setw(2) << r.date_month << "-"
          << r.date_year
          << "  |  "
          << setfill('0') << setw(2) << r.time_start_hour << ":"
@@ -103,28 +103,28 @@ void printNode(const Node *node, int nomor)
          << setfill('0') << setw(2) << r.time_stop_hour << ":"
          << setfill('0') << setw(2) << r.time_stop_minutes
          << "  (" << r.duration << " mnt)\n";
-    cout << "   Status    : " << r.status << "\n";
+    cout << "   Status      : " << r.status << "\n";
 }
 
 void displayList(const LinkedList &list, const string &label)
 {
-    cout << "\n=== " << label << " ===\n";
-    cout << "Total: " << list.size << " data\n";
-    cout << string(48, '-') << "\n";
+    cout << "\n" << string(15, '=') << " " << label << " " << string(25, '=') << "\n";
+    cout << string(50, '-') << "\n";
 
     if (isEmpty(list))
     {
-        cout << "  [!] Tidak ada data.\n";
-        cout << string(48, '-') << "\n";
+        cout << "  [!] Data is not available.\n";
+        cout << string(50, '-') << "\n";
         return;
     }
 
+    cout << "Total      : " << list.size << " data\n";
     Node *temp = list.head;
     int urutan = 1;
     while (temp != nullptr)
     {
         printNode(temp, urutan++);
-        cout << string(48, '-') << "\n";
+        cout << string(50, '-') << endl;
         temp = temp->next;
     }
 }

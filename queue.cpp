@@ -25,5 +25,5 @@ Node* dequeue(Queue &queue)
 // Menampilkan isi queue
 void showQueue(const Queue &queue)
 {
-    displayList(queue, "Queue (FIFO)");
+    displayList(queue, "Reservation List");
 }
