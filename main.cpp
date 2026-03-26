@@ -27,6 +27,12 @@ int main(){
     initList(list);
     initDatabase(&db, "reservations.db");
 
+    Node* savedData = loadReservations(db);
+    while(savedData != nullptr) {
+        enqueue(list, savedData->data);
+        savedData = savedData->next;
+    }
+
     userLogin(user);
     displayMenu(user, list, db);
 
@@ -182,7 +188,6 @@ void addNewReservation(Reservation &user, Queue &list, sqlite3* db){
         cout << "\nChecking available time slots";
 
         hasTimeConflict(db, user);
-        loadReservations(db);
         saveReservation(db, createNode(user));
         updateStatus(db, user.niu, "Accepted");
         enqueue(list, user);
@@ -209,7 +214,7 @@ void showReservationQueue(Reservation &user, Queue &list, sqlite3* db){
 }
 
 void showReservationHistory(Reservation &user, Queue &list, sqlite3* db){
-    // getReservationByNIU(db, user.niu);
+    getReservationsByNIU(db, user.niu);
 
     continueOrLogout(user, list, db);
 }

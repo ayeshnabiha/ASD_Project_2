@@ -23,6 +23,6 @@ bool clearDatabase(sqlite3* db);
 bool hasTimeConflict(sqlite3* db, const Reservation& r);
 
 // filters
-Node* getReservationByNIU(sqlite3* db, const std::string& niu);
+Node* getReservationsByNIU(sqlite3* db, const std::string& niu);
 
 #endif
