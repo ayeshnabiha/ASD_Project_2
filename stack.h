@@ -3,14 +3,11 @@
 
 #include "linkedList.h"
 
-struct Stack {
-    Node* top;
-};
+typedef LinkedList Stack; 
 
-// Fungsi
 void initStack(Stack &s);
 bool isStackEmpty(const Stack &s);
-void push(Stack &s, const Reservation &data); 
+void push(Stack &s, const Reservation &data);
 void pop(Stack &s);
 void peek(const Stack &s);
 void displayStack(const Stack &s);
