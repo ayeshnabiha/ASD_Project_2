@@ -14,4 +14,13 @@ Node* dequeue(Queue &queue);
 // Display the queue
 void showQueue(const Queue &queue);
 
+// Function to peek at the front element of the queue without removing it
+Node* peekQueue(const Queue &queue);
+
+// Function to get the size of the queue
+int sizeQueue(const Queue &queue);
+
+// Function to clear the queue
+void clearQueue(Queue &queue);
+
 #endif
