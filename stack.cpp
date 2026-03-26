@@ -15,7 +15,7 @@ bool isStackEmpty(const Stack &s) {
 
 // PUSH: Menambah riwayat reservasi yang baru diproses ke tumpukan atas
 void push(Stack &s, const Reservation &data) {
-    // fungsi createNode ajik
+  
     Node* newNode = createNode(data);
     
     if (isStackEmpty(s)) {
