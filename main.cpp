@@ -215,6 +215,7 @@ void showReservationQueue(Reservation &user, Queue &list, sqlite3* db){
 
 void showReservationHistory(Reservation &user, Queue &list, sqlite3* db){
     getReservationsByNIU(db, user.niu);
+    
 
     continueOrLogout(user, list, db);
 }

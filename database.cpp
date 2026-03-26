@@ -130,7 +130,7 @@ Node* loadReservations(sqlite3* db) {
 }
 
 Node* getReservationsByNIU(sqlite3* db, const std::string& niu) {
-    const char* querySQL = "SELECT niu, group_name, date_day, date_month, date_year, purpose, duration, time_start_hour, time_start_minutes, time_stop_hour, time_stop_minutes, status FROM reservations WHERE niu = ?;";
+    const char* querySQL = "SELECT niu, group_name, date_day, date_month, date_year, purpose, duration, time_start_hour, time_start_minutes, time_stop_hour, time_stop_minutes, status FROM reservations WHERE niu LIKE ?;";
 
     sqlite3_stmt* stmt;
     int rc = sqlite3_prepare_v2(db, querySQL, -1, &stmt, nullptr);
