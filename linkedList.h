@@ -12,7 +12,7 @@ struct Reservation
     int date_day;
     int date_month;
     int date_year;
-    int purpose;
+    std::string purpose;
     int duration; // in minutes
     int time_start_hour;
     int time_start_minutes;
@@ -44,8 +44,11 @@ bool isEmpty(const LinkedList &list);
 void insertEnd(LinkedList &list, Node *newNode);
 void insertFront(LinkedList &list, Node *newNode);
 Node *deleteFront(LinkedList &list);
+Node *deleteMiddle(LinkedList &list, const std::string &niu);
+Node *deleteEnd(LinkedList &list);
 void printNode(const Node *node, int num = 0);                                         // display single node
 void displayList(const LinkedList &list, const std::string &label = "Data Reservasi"); // display all list
+Node *cancelReservation(LinkedList &list, const std::string &niu);
 
 void freeList(LinkedList &list);
 

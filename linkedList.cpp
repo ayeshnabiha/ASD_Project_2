@@ -79,6 +79,58 @@ Node *deleteFront(LinkedList &list)
     return removed;
 }
 
+Node *deleteMiddle(LinkedList &list, const std::string &niu)
+{
+    if (isEmpty(list))
+        return nullptr;
+
+    if (list.head->data.niu == niu)
+        return deleteFront(list);
+
+    Node *prev = list.head;
+    Node *curr = list.head->next;
+
+    while (curr != nullptr && curr->data.niu != niu)
+    {
+        prev = curr;
+        curr = curr->next;
+    }
+
+    if (curr == nullptr)
+        return nullptr;
+
+    prev->next = curr->next;
+
+    if (curr == list.tail)
+        list.tail = prev;
+
+    curr->next = nullptr;
+    list.size--;
+
+    return curr;
+}
+
+Node *deleteEnd(LinkedList &list)
+{
+    if (isEmpty(list))
+        return nullptr;
+
+    if (list.head == list.tail)
+        return deleteFront(list);
+
+    Node *prev = list.head;
+    while (prev->next != list.tail)
+        prev = prev->next;
+
+    Node *removed = list.tail;
+    list.tail = prev;
+    list.tail->next = nullptr;
+    removed->next = nullptr;
+    list.size--;
+
+    return removed;
+}
+
 void printNode(const Node *node, int nomor)
 {
     if (node == nullptr)
@@ -120,7 +172,7 @@ void displayList(const LinkedList &list, const string &label)
         return;
     }
 
-        Node *temp = list.head;
+    Node *temp = list.head;
     int urutan = 1;
     while (temp != nullptr)
     {
@@ -128,6 +180,16 @@ void displayList(const LinkedList &list, const string &label)
         cout << string(50, '-') << endl;
         temp = temp->next;
     }
+}
+
+Node *cancelReservation(LinkedList &list, const std::string &niu)
+{
+    Node *cancelledNode = deleteMiddle(list, niu);
+
+    if (cancelledNode != nullptr)
+        cancelledNode->data.status = "Cancelled";
+
+    return cancelledNode;
 }
 
 void freeList(LinkedList &list)
@@ -142,4 +204,3 @@ void freeList(LinkedList &list)
     list.tail = nullptr;
     list.size = 0;
 }
-
