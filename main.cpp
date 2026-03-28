@@ -33,7 +33,6 @@ int main(){
     Node* savedData = loadReservations(db);
     while(savedData != nullptr) {
         enqueue(list, savedData->data);
-        push(list, savedData->data);
         savedData = savedData->next;
     }
 
@@ -207,9 +206,21 @@ void showReservationQueue(Reservation &user, Queue &list, sqlite3* db){
 }
 
 void showReservationHistory(Reservation &user, Queue &list, sqlite3* db){
-    // Node* history = getReservationsByNIU(db, user.niu);
-    // displayList(history, "Reservation History");
-    // freeList(history);
+    Stack history;
+    initStack(history);
+
+    Node* head = getReservationsByNIU(db, user.niu);
+
+    Node* temp = head;
+    while(temp != nullptr) {
+        push(history, temp->data);
+        temp = temp->next;
+    }
+
+    displayList(history, "RESERVATION HISTORY");
+
+    freeList(history);
+
     continueOrLogout(user, list, db);
 }
 
