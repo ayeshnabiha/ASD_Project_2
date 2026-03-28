@@ -12,7 +12,7 @@ struct Reservation
     int date_day;
     int date_month;
     int date_year;
-    std::string purpose;
+    int purpose;
     int duration; // in minutes
     int time_start_hour;
     int time_start_minutes;
