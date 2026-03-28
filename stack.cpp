@@ -30,8 +30,9 @@ void peek(const Stack &s) {
     if (isStackEmpty(s)) {
         cout << "Riwayat kosong!" << endl;
     } else {
-       
+        cout << "Successfully added your reservation!" << endl;
         printNode(s.head); 
+        cout << string(50, '-') << "\n";
     }
 }
 

@@ -108,8 +108,10 @@ void printNode(const Node *node, int nomor)
 
 void displayList(const LinkedList &list, const string &label)
 {
-    cout << "\n" << string(15, '=') << " " << label << " " << string(15, '=') << "\n";
+    cout << string(15, '=') << " " << label << " " << string(15, '=') << "\n";
     cout << string(50, '-') << "\n";
+
+    cout << "Total      : " << list.size << " data\n";
 
     if (isEmpty(list))
     {
@@ -118,8 +120,7 @@ void displayList(const LinkedList &list, const string &label)
         return;
     }
 
-    cout << "Total      : " << list.size << " data\n";
-    Node *temp = list.head;
+        Node *temp = list.head;
     int urutan = 1;
     while (temp != nullptr)
     {
@@ -141,3 +142,4 @@ void freeList(LinkedList &list)
     list.tail = nullptr;
     list.size = 0;
 }
+

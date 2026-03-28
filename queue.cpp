@@ -25,7 +25,7 @@ Node* dequeue(Queue &queue)
 // Display the queue
 void showQueue(const Queue &queue)
 {
-    displayList(queue, "Queue (FIFO)");
+    displayList(queue, " Reservation List ");
 }
 
 // Function to peek at the front element of the queue without removing it
@@ -33,7 +33,7 @@ Node* peekQueue(const Queue &queue)
 {
     if (isEmpty(queue))
     {
-        cout << "Queue kosong!" << endl;
+        cout << "Queue empty!" << endl;
         return nullptr;
     }
 

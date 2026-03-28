@@ -23,18 +23,6 @@ bool isValidTime(int hour, int minutes) {
     return true;
 }
 
-bool isValidDuration(int time_start_hour, int time_start_minutes,
-                     int time_stop_hour, int time_stop_minutes,
-                     int duration) {
-    // check stop is after start
-    int startTotal = time_start_hour * 60 + time_start_minutes;
-    int stopTotal  = time_stop_hour  * 60 + time_stop_minutes;
-
-    if (stopTotal <= startTotal) return false;
-
-    // check duration matches start and stop
-    int actualDuration = stopTotal - startTotal;
-    if (actualDuration != duration) return false;
-
-    return true;
+bool isValidDuration(int duration) {
+    return duration > 0 && duration <= 24 * 60;
 }
