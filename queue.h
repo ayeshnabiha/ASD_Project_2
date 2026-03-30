@@ -5,6 +5,8 @@
 
 typedef LinkedList Queue;
 
+void initQueue(Queue &queue);
+
 // Function for FIFO 
 void enqueue(Queue &queue, const Reservation &data);
 

@@ -176,7 +176,8 @@ void inputSchedule(Reservation &user){
     char dash1, dash2;
 
     cout << "Enter your group name: ";
-    cin >> user.group_name;
+    cin.ignore();
+    getline(cin, user.group_name);
 
     cout << "\nPurpose" << endl;
     cout << "1. Praktikum" << endl;
@@ -185,8 +186,11 @@ void inputSchedule(Reservation &user){
     cout << "Enter the purpose of reservation: ";
     cin >> user.purpose;
 
-    while(user.purpose != 1 && user.purpose != 2 && user.purpose != 3){
-        cout << "Invalid! Please enter one of the option above: ";
+    while(user.purpose != 1 && user.purpose != 2 && user.purpose != 3) {
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+        cout << "Invalid! Please enter one of the options (1, 2, or 3): ";
         cin >> user.purpose;
     }
 
@@ -222,9 +226,20 @@ void inputSchedule(Reservation &user){
         user.time_stop_minutes %= 60;}
 }
 
-
 void showReservationQueue(Reservation &user, Queue &list, sqlite3* db){
-    showQueue(list); 
+    Queue tempQueue;
+    initQueue(tempQueue);
+
+    Node* temp = list.head;
+    while(temp != nullptr){
+        enqueue(tempQueue, temp->data); 
+        temp = temp->next;
+    }
+
+    showQueue(tempQueue);
+
+    freeList(tempQueue);
+
     continueOrLogout(user, list, db);
 }
 
@@ -261,7 +276,6 @@ void continueOrLogout(Reservation &user, Queue &list, sqlite3* db){
         logout(); 
     }
     else{
-        cout << endl;
         displayMenuOrLogout(user, list, db);
     }
 }
@@ -290,7 +304,5 @@ void logout(){
     this_thread::sleep_for(chrono::seconds(1));
     cout << "\nLogged out successfully!" << endl;
     cout << string(50, '-') << endl;
-    //freeList(queue);
-    //closeDatabase(db);
     return; 
 }

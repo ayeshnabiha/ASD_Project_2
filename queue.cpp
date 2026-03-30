@@ -3,6 +3,10 @@
 #include <iostream>
 using namespace std;
 
+void initQueue(Queue &queue) {
+    initList(queue); 
+}
+
 // Function for FIFO 
 void enqueue(Queue &queue, const Reservation &data)
 {
