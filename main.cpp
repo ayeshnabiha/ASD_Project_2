@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <chrono>
+#include <iomanip>
 #include <thread>
 
 #include "linkedList.h"
@@ -155,7 +156,7 @@ void addNewReservation(Reservation &user, Queue &queue, Stack &stack, sqlite3 *d
     cout << "Name       : " << user.group_name << endl;
     cout << "Purpose    : " << (user.purpose == 1 ? "Praktikum" : (user.purpose == 2 ? "Pelatihan" : "Other")) << endl;
     cout << "Date       : " << user.date_day << "-" << user.date_month << "-" << user.date_year << endl;
-    cout << "Schedule   : " << user.time_start_hour << ":" << user.time_start_minutes << " - " << user.time_stop_hour << ":" << user.time_stop_minutes << endl;
+    cout << "Schedule   : " << setfill('0') << setw(2) << user.time_start_hour << ":"  << setw(2) << user.time_start_minutes << " - " << setw(2) << user.time_stop_hour << ":"  << setw(2) << user.time_stop_minutes << endl;
 
     confirm = getYesNoInput("\nConfirm reservation? (Y/N): ");
 
@@ -272,7 +273,7 @@ void showReservationHistory(Reservation &user, Queue &queue, Stack &stack, sqlit
         temp = temp->next;
     }
 
-    displayList(history, "Reservation History");
+    displayStack(history);
 
     freeList(history);
 

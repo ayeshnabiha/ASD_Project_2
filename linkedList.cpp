@@ -140,13 +140,18 @@ void printNode(const Node *node, int nomor)
 
     const Reservation &r = node->data;
 
+    string purposeStr;
+    if (r.purpose == 1) purposeStr = "Praktikum";
+    else if (r.purpose == 2) purposeStr = "Pelatihan";
+    else purposeStr = "Other";
+
     if (nomor > 0)
         cout << nomor << ". ";
     else
         cout << "   ";
 
     cout << r.group_name << " (" << r.niu << ")\n";
-    cout << "   Purpose      : " << r.purpose << "\n";
+    cout << "   Purpose      : " << purposeStr << "\n";
     cout << "   Schedule     : "
          << setfill('0') << setw(2) << r.date_day << "-"
          << setfill('0') << setw(2) << r.date_month << "-"
