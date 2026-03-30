@@ -12,35 +12,36 @@
 using namespace std;
 
 void userLogin(Reservation &user);
-void displayMenu(Reservation &user, Queue &list, sqlite3 *db);
-void displayMenuOrLogout(Reservation &user, Queue &list, sqlite3 *db);
-void addNewReservation(Reservation &user, Queue &list, sqlite3 *db);
+void displayMenu(Reservation &user, Queue &queue, Stack &stack, sqlite3 *db);
+void displayMenuOrLogout(Reservation &user, Queue &queue, Stack &stack, sqlite3 *db);
+void addNewReservation(Reservation &user, Queue &queue, Stack &stack, sqlite3 *db);
 void inputSchedule(Reservation &user);
-void showReservationQueue(Reservation &user, Queue &list, sqlite3 *db);
-void showReservationHistory(Reservation &user, Queue &list, sqlite3 *db);
-void showReservationDetails(Reservation &user, Queue &list, sqlite3 *db);
-void continueOrLogout(Reservation &user, Queue &list, sqlite3 *db);
+void showReservationQueue(Reservation &user, Queue &queue, Stack &stack, sqlite3 *db);
+void showReservationHistory(Reservation &user, Queue &queue, Stack &stack, sqlite3 *db);
+void showReservationDetails(Reservation &user, Stack &stack, sqlite3 *db);
+void continueOrLogout(Reservation &user, Queue &queue, Stack &stack, sqlite3 *db);
 char getYesNoInput(const string &prompt);
 void logout();
 
 int main()
 {
     Reservation user;
-    Queue list;
+    Queue queue;
+    Stack stack;
     sqlite3 *db;
 
-    initList(list);
+    initList(queue);
     initDatabase(&db, "reservations.db");
 
     Node *savedData = loadReservations(db);
     while (savedData != nullptr)
     {
-        enqueue(list, savedData->data);
+        enqueue(queue, savedData->data);
         savedData = savedData->next;
     }
 
     userLogin(user);
-    displayMenu(user, list, db);
+    displayMenu(user, queue, stack, db);
 
     return 0;
 }
@@ -60,7 +61,7 @@ void userLogin(Reservation &user)
     }
 }
 
-void displayMenu(Reservation &user, Queue &list, sqlite3 *db)
+void displayMenu(Reservation &user, Queue &queue, Stack &stack, sqlite3 *db)
 {
     int menu;
 
@@ -78,19 +79,19 @@ void displayMenu(Reservation &user, Queue &list, sqlite3 *db)
 
     if (menu == 1)
     {
-        addNewReservation(user, list, db);
+        addNewReservation(user, queue, stack, db);
     }
     else if (menu == 2)
     {
-        showReservationQueue(user, list, db);
+        showReservationQueue(user, queue, stack, db);
     }
     else if (menu == 3)
     {
-        showReservationHistory(user, list, db);
+        showReservationHistory(user, queue,stack, db);
     }
 }
 
-void displayMenuOrLogout(Reservation &user, Queue &list, sqlite3 *db)
+void displayMenuOrLogout(Reservation &user, Queue &queue, Stack &stack, sqlite3 *db)
 {
     int menu;
 
@@ -106,15 +107,15 @@ void displayMenuOrLogout(Reservation &user, Queue &list, sqlite3 *db)
 
     if (menu == 1)
     {
-        addNewReservation(user, list, db);
+        addNewReservation(user, queue, stack, db);
     }
     else if (menu == 2)
     {
-        showReservationQueue(user, list, db);
+        showReservationQueue(user, queue, stack, db);
     }
     else if (menu == 3)
     {
-        showReservationHistory(user, list, db);
+        showReservationHistory(user, queue, stack, db);
     }
     else if (menu == 4)
     {
@@ -122,11 +123,30 @@ void displayMenuOrLogout(Reservation &user, Queue &list, sqlite3 *db)
     }
 }
 
-void addNewReservation(Reservation &user, Queue &list, sqlite3 *db)
+void addNewReservation(Reservation &user, Queue &queue, Stack &stack, sqlite3 *db)
 {
-    char confirm, dash1, dash2;
-
+    char confirm;
     this_thread::sleep_for(chrono::seconds(1));
+
+    cout << "Enter your group name: ";
+    cin.ignore();
+    getline(cin, user.group_name);
+
+    cout << "\nPurpose" << endl;
+    cout << "1. Praktikum" << endl;
+    cout << "2. Pelatihan" << endl;
+    cout << "3. Other" << endl;
+    cout << "Enter the purpose of reservation: ";
+    cin >> user.purpose;
+
+    while (user.purpose != 1 && user.purpose != 2 && user.purpose != 3)
+    {
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+        cout << "Invalid! Please enter one of the options (1, 2, or 3): ";
+        cin >> user.purpose;
+    }
 
     inputSchedule(user);
 
@@ -142,7 +162,7 @@ void addNewReservation(Reservation &user, Queue &list, sqlite3 *db)
     if (confirm == 'N' || confirm == 'n')
     {
         cout << string(50, '-') << endl;
-        addNewReservation(user, list, db);
+        addNewReservation(user, queue, stack, db);
     }
 
     cout << "\nChecking available time slots";
@@ -164,7 +184,7 @@ void addNewReservation(Reservation &user, Queue &list, sqlite3 *db)
 
         if (confirm == 'N' || confirm == 'n')
         {
-            addNewReservation(user, list, db);
+            addNewReservation(user, queue, stack, db);
         }
 
         cout << "\nChecking available time slots";
@@ -172,8 +192,8 @@ void addNewReservation(Reservation &user, Queue &list, sqlite3 *db)
 
     saveReservation(db, createNode(user));
     updateStatus(db, user.niu, "Accepted");
-    enqueue(list, user);
-    push(list, user);
+    enqueue(queue, user);
+    push(stack, user);
 
     this_thread::sleep_for(chrono::seconds(1));
     cout << "\nAdding new reservation";
@@ -187,33 +207,13 @@ void addNewReservation(Reservation &user, Queue &list, sqlite3 *db)
     cout << string(50, '-') << endl;
     this_thread::sleep_for(chrono::seconds(1));
 
-    showReservationDetails(user, list, db);
-    continueOrLogout(user, list, db);
+    showReservationDetails(user, stack, db);
+    continueOrLogout(user, queue, stack, db);
 }
 
 void inputSchedule(Reservation &user)
 {
     char dash1, dash2;
-
-    cout << "Enter your group name: ";
-    cin.ignore();
-    getline(cin, user.group_name);
-
-    cout << "\nPurpose" << endl;
-    cout << "1. Praktikum" << endl;
-    cout << "2. Pelatihan" << endl;
-    cout << "3. Other" << endl;
-    cout << "Enter the purpose of reservation: ";
-    cin >> user.purpose;
-
-    while (user.purpose != 1 && user.purpose != 2 && user.purpose != 3)
-    {
-        cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-
-        cout << "Invalid! Please enter one of the options (1, 2, or 3): ";
-        cin >> user.purpose;
-    }
 
     cout << "\nEnter the date of reservation (DD-MM-YYYY): ";
     cin >> user.date_day >> dash1 >> user.date_month >> dash2 >> user.date_year;
@@ -252,26 +252,13 @@ void inputSchedule(Reservation &user)
     }
 }
 
-void showReservationQueue(Reservation &user, Queue &list, sqlite3 *db)
+void showReservationQueue(Reservation &user, Queue &queue, Stack &stack, sqlite3 *db)
 {
-    Queue tempQueue;
-    initQueue(tempQueue);
-
-    Node *temp = list.head;
-    while (temp != nullptr)
-    {
-        enqueue(tempQueue, temp->data);
-        temp = temp->next;
-    }
-
-    showQueue(tempQueue);
-
-    freeList(tempQueue);
-
-    continueOrLogout(user, list, db);
+    showQueue(queue);
+    continueOrLogout(user, queue, stack, db);
 }
 
-void showReservationHistory(Reservation &user, Queue &list, sqlite3 *db)
+void showReservationHistory(Reservation &user, Queue &queue, Stack &stack, sqlite3 *db)
 {
     Stack history;
     initStack(history);
@@ -285,19 +272,19 @@ void showReservationHistory(Reservation &user, Queue &list, sqlite3 *db)
         temp = temp->next;
     }
 
-    displayList(history, "RESERVATION HISTORY");
+    displayList(history, "Reservation History");
 
     freeList(history);
 
-    continueOrLogout(user, list, db);
+    continueOrLogout(user, queue, stack, db);
 }
 
-void showReservationDetails(Reservation &user, Queue &list, sqlite3 *db)
+void showReservationDetails(Reservation &user, Stack &stack, sqlite3 *db)
 {
-    peek(list);
+    peek(stack);
 }
 
-void continueOrLogout(Reservation &user, Queue &list, sqlite3 *db)
+void continueOrLogout(Reservation &user, Queue &queue, Stack &stack, sqlite3 *db)
 {
     char choice;
 
@@ -310,7 +297,7 @@ void continueOrLogout(Reservation &user, Queue &list, sqlite3 *db)
     }
     else
     {
-        displayMenuOrLogout(user, list, db);
+        displayMenuOrLogout(user, queue, stack, db);
     }
 }
 

@@ -37,5 +37,5 @@ void peek(const Stack &s) {
 }
 
 void displayStack(const Stack &s) {
-    displayList(s, "RIWAYAT RESERVASI (STACK)"); 
+    displayList(s, "RESERVATION HISTORY"); 
 }
