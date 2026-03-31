@@ -4,6 +4,8 @@
 #include <thread>
 #include <chrono>
 #include <string>
+#include <tuple>
+#include <utility>
 using namespace std;
 
 // Function Implementation
@@ -141,9 +143,12 @@ void printNode(const Node *node, int nomor)
     const Reservation &r = node->data;
 
     string purposeStr;
-    if (r.purpose == 1) purposeStr = "Praktikum";
-    else if (r.purpose == 2) purposeStr = "Pelatihan";
-    else purposeStr = "Other";
+    if (r.purpose == 1)
+        purposeStr = "Praktikum";
+    else if (r.purpose == 2)
+        purposeStr = "Pelatihan";
+    else
+        purposeStr = "Other";
 
     if (nomor > 0)
         cout << nomor << ". ";
@@ -200,6 +205,41 @@ Node *cancelReservation(LinkedList &list, const std::string &niu)
         cancelledNode->data.status = "Cancelled";
 
     return cancelledNode;
+}
+
+bool isLater(const Reservation &a, const Reservation &b)
+{
+    return std::tie(a.date_year, a.date_month, a.date_day,
+                    a.time_start_hour, a.time_start_minutes) > std::tie(b.date_year, b.date_month, b.date_day,
+                                                                        b.time_start_hour, b.time_start_minutes);
+}
+
+void sortBySchedule(LinkedList &list)
+{
+    if (isEmpty(list) || list.head->next == nullptr)
+        return;
+
+    bool swapped;
+    Node *curr;
+    Node *lptr = nullptr;
+
+    do
+    {
+        swapped = false;
+        curr = list.head;
+
+        while (curr->next != lptr)
+        {
+            if (isLater(curr->data, curr->next->data))
+            {
+                std::swap(curr->data, curr->next->data);
+                swapped = true;
+            }
+            curr = curr->next;
+        }
+        lptr = curr;
+
+    } while (swapped);
 }
 
 void freeList(LinkedList &list)

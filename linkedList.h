@@ -46,10 +46,13 @@ void insertFront(LinkedList &list, Node *newNode);
 Node *deleteFront(LinkedList &list);
 Node *deleteMiddle(LinkedList &list, const std::string &niu);
 Node *deleteEnd(LinkedList &list);
+
 void printNode(const Node *node, int num = 0);                                         // display single node
 void displayList(const LinkedList &list, const std::string &label = "Data Reservasi"); // display all list
 Node *cancelReservation(LinkedList &list, const std::string &niu);
 
+bool isLater(const Reservation &a, const Reservation &b);
+void sortBySchedule(LinkedList &list);
 void freeList(LinkedList &list);
 
 #endif
