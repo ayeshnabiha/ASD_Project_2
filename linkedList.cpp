@@ -2,7 +2,6 @@
 #include <iostream>
 #include <iomanip>
 #include <thread>
-#include <chrono>
 #include <string>
 #include <tuple>
 #include <utility>
@@ -177,8 +176,6 @@ void displayList(const LinkedList &list, const string &label)
 
     cout << "Total      : " << list.size << " data\n";
 
-    this_thread::sleep_for(chrono::seconds(1));
-
     if (isEmpty(list))
     {
         cout << "  [!] Data is not available.\n";
@@ -193,7 +190,6 @@ void displayList(const LinkedList &list, const string &label)
         printNode(temp, urutan++);
         cout << string(50, '-') << endl;
         temp = temp->next;
-        this_thread::sleep_for(chrono::milliseconds(500));
     }
 }
 

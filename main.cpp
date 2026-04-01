@@ -1,6 +1,5 @@
 #include <iostream>
 #include <string>
-#include <chrono>
 #include <iomanip>
 #include <thread>
 #include <limits>
@@ -52,7 +51,6 @@ int main()
 void userLogin(Reservation &user)
 {
     cout << "Welcome to Computer Laboratory Reservation System!" << endl;
-    this_thread::sleep_for(chrono::seconds(1));
     cout << string(50, '-') << "\n";
     cout << "Please enter your 6-digit NIU: ";
 
@@ -68,7 +66,6 @@ void displayMenu(Reservation &user, Queue &queue, Stack &stack, sqlite3 *db)
 {
     int menu;
 
-    this_thread::sleep_for(chrono::seconds(1));
     cout << string(50, '-') << "\n";
     cout << "Menu" << endl;
     cout << "1. Add new reservation" << endl;
@@ -129,7 +126,6 @@ void displayMenuOrLogout(Reservation &user, Queue &queue, Stack &stack, sqlite3 
 void addNewReservation(Reservation &user, Queue &queue, Stack &stack, sqlite3 *db)
 {
     char confirm;
-    this_thread::sleep_for(chrono::seconds(1));
 
     cout << "Enter your group name: ";
     cin.ignore();
@@ -163,12 +159,10 @@ void addNewReservation(Reservation &user, Queue &queue, Stack &stack, sqlite3 *d
     }
 
     cout << "\nChecking available time slots" << endl;
-    this_thread::sleep_for(chrono::seconds(1));
 
     while (hasTimeConflict(db, user))
     {
         cout << "\nTime slot is already taken. Please choose another time." << endl;
-        this_thread::sleep_for(chrono::seconds(1));
 
         inputSchedule(user);
 
@@ -191,24 +185,18 @@ void addNewReservation(Reservation &user, Queue &queue, Stack &stack, sqlite3 *d
         enqueue(queue, user);
         push(stack, user);
 
-        this_thread::sleep_for(chrono::seconds(1));
         cout << "\nAdding new reservation";
         for (int i = 0; i < 3; i++)
         {
-            this_thread::sleep_for(chrono::milliseconds(500));
             cout << ".";
         }
         cout << endl;
-        this_thread::sleep_for(chrono::seconds(1));
         cout << string(50, '-') << endl;
-        this_thread::sleep_for(chrono::seconds(1));
 
         showReservationDetails(user, stack, db);
     } else {
         cout << "\nFailed to add reservation." << endl;
-        this_thread::sleep_for(chrono::seconds(1));
         cout << "\nReturning to main menu";
-        this_thread::sleep_for(chrono::seconds(1));
     }
 
     continueOrLogout(user, queue, stack, db);
@@ -372,10 +360,8 @@ void logout()
     cout << "Logging out";
     for (int i = 0; i < 3; i++)
     {
-        this_thread::sleep_for(chrono::milliseconds(500));
         cout << ".";
     }
-    this_thread::sleep_for(chrono::seconds(1));
     cout << "\nLogged out successfully!" << endl;
     cout << string(50, '-') << endl;
     return;
