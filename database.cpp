@@ -1,5 +1,67 @@
 #include "database.h"
 #include <iostream>
+#include <tuple>
+#include <ctime>
+
+namespace {
+bool isReservationPassed(const Reservation& reservation) {
+    std::time_t currentTimestamp = std::time(nullptr);
+    std::tm *currentTime = std::localtime(&currentTimestamp);
+
+    auto reservationEnd = std::make_tuple(
+        reservation.date_year,
+        reservation.date_month,
+        reservation.date_day,
+        reservation.time_stop_hour,
+        reservation.time_stop_minutes
+    );
+
+    auto now = std::make_tuple(
+        currentTime->tm_year + 1900,
+        currentTime->tm_mon + 1,
+        currentTime->tm_mday,
+        currentTime->tm_hour,
+        currentTime->tm_min
+    );
+
+    return reservationEnd <= now;
+}
+
+bool markReservationCompleted(sqlite3* db, const Reservation& reservation) {
+    const char* updateSQL = R"(
+        UPDATE reservations
+        SET status = 'Completed'
+        WHERE niu = ?
+          AND date_day = ?
+          AND date_month = ?
+          AND date_year = ?
+          AND time_start_hour = ?
+          AND time_start_minutes = ?
+          AND status != 'Cancelled'
+          AND status != 'Completed';
+    )";
+
+    sqlite3_stmt* stmt;
+    int rc = sqlite3_prepare_v2(db, updateSQL, -1, &stmt, nullptr);
+
+    if (rc != SQLITE_OK) {
+        std::cerr << "Failed to prepare completed update statement: " << sqlite3_errmsg(db) << std::endl;
+        return false;
+    }
+
+    sqlite3_bind_text(stmt, 1, reservation.niu.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_int(stmt, 2, reservation.date_day);
+    sqlite3_bind_int(stmt, 3, reservation.date_month);
+    sqlite3_bind_int(stmt, 4, reservation.date_year);
+    sqlite3_bind_int(stmt, 5, reservation.time_start_hour);
+    sqlite3_bind_int(stmt, 6, reservation.time_start_minutes);
+
+    rc = sqlite3_step(stmt);
+    sqlite3_finalize(stmt);
+
+    return rc == SQLITE_DONE;
+}
+}
 
 bool initDatabase(sqlite3** db, const std::string& filename) {
     int rc = sqlite3_open(filename.c_str(), db);
@@ -83,7 +145,7 @@ bool saveReservation(sqlite3* db, Node* node) {
 }
 
 Node* loadReservations(sqlite3* db) {
-    const char* selectSQL = "SELECT niu, group_name, date_day, date_month, date_year, purpose, duration, time_start_hour, time_start_minutes, time_stop_hour, time_stop_minutes, status FROM reservations WHERE status != 'Cancelled';";
+    const char* selectSQL = "SELECT niu, group_name, date_day, date_month, date_year, purpose, duration, time_start_hour, time_start_minutes, time_stop_hour, time_stop_minutes, status FROM reservations WHERE status != 'Cancelled' AND status != 'Completed';";
 
     sqlite3_stmt* stmt;
     int rc = sqlite3_prepare_v2(db, selectSQL, -1, &stmt, nullptr);
@@ -110,6 +172,13 @@ Node* loadReservations(sqlite3* db) {
         r.time_stop_hour     = sqlite3_column_int(stmt, 9);
         r.time_stop_minutes  = sqlite3_column_int(stmt, 10);
         r.status             = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 11));
+
+        if (isReservationPassed(r)) {
+            if (!markReservationCompleted(db, r)) {
+                std::cerr << "Warning: failed to mark reservation as Completed for NIU " << r.niu << std::endl;
+            }
+            continue;
+        }
 
         Node* newNode = createNode(r);
 
