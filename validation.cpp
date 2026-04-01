@@ -1,5 +1,6 @@
 #include "validation.h"
 #include <sstream>
+#include <ctime>
 using namespace std;
 
 bool parseDateInput(const string &input, int &day, int &month, int &year) {
@@ -50,6 +51,24 @@ bool isPassedDate(int day, int month, int year) {
     if (year == currentYear && month == currentMonth && day < currentDay) return true;
 
     return false;
+}
+
+bool isPassedStartTime(int day, int month, int year, int startHour, int startMinutes) {
+    time_t t = time(nullptr);
+    tm *currentTime = localtime(&t);
+
+    int currentYear = currentTime->tm_year + 1900;
+    int currentMonth = currentTime->tm_mon + 1;
+    int currentDay = currentTime->tm_mday;
+
+    if (year != currentYear || month != currentMonth || day != currentDay) {
+        return false;
+    }
+
+    int currentTotalMinutes = currentTime->tm_hour * 60 + currentTime->tm_min;
+    int inputStartTotalMinutes = startHour * 60 + startMinutes;
+
+    return inputStartTotalMinutes <= currentTotalMinutes;
 }
 
 bool isValidDate(int day, int month, int year) {

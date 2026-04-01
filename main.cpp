@@ -263,6 +263,13 @@ void inputSchedule(Reservation &user)
             continue;
         }
 
+        if (isPassedStartTime(user.date_day, user.date_month, user.date_year,
+                                     user.time_start_hour, user.time_start_minutes))
+        {
+            cout << "Start time has already passed for today! Please enter a future time (HH:MM)." << endl;
+            continue;
+        }
+
         break;
     }
 
