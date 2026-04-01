@@ -197,16 +197,6 @@ void displayList(const LinkedList &list, const string &label)
     }
 }
 
-Node *cancelReservation(LinkedList &list, const std::string &niu)
-{
-    Node *cancelledNode = deleteMiddle(list, niu);
-
-    if (cancelledNode != nullptr)
-        cancelledNode->data.status = "Cancelled";
-
-    return cancelledNode;
-}
-
 bool isLater(const Reservation &a, const Reservation &b)
 {
     return std::tie(a.date_year, a.date_month, a.date_day,
@@ -223,115 +213,115 @@ bool isEarlier(const Reservation &a, const Reservation &b)
 
 namespace
 {
-Node *splitList(Node *head)
-{
-    if (head == nullptr || head->next == nullptr)
+    Node *splitList(Node *head)
     {
-        return nullptr;
-    }
-
-    Node *slow = head;
-    Node *fast = head->next;
-
-    while (fast != nullptr && fast->next != nullptr)
-    {
-        slow = slow->next;
-        fast = fast->next->next;
-    }
-
-    Node *secondHalf = slow->next;
-    slow->next = nullptr;
-    return secondHalf;
-}
-
-Node *mergeAscending(Node *left, Node *right)
-{
-    Node dummy;
-    dummy.next = nullptr;
-    Node *tail = &dummy;
-
-    while (left != nullptr && right != nullptr)
-    {
-        if (!isLater(left->data, right->data))
+        if (head == nullptr || head->next == nullptr)
         {
-            tail->next = left;
-            left = left->next;
+            return nullptr;
         }
-        else
+
+        Node *slow = head;
+        Node *fast = head->next;
+
+        while (fast != nullptr && fast->next != nullptr)
         {
-            tail->next = right;
-            right = right->next;
+            slow = slow->next;
+            fast = fast->next->next;
         }
-        tail = tail->next;
+
+        Node *secondHalf = slow->next;
+        slow->next = nullptr;
+        return secondHalf;
     }
 
-    tail->next = (left != nullptr) ? left : right;
-    return dummy.next;
-}
-
-Node *mergeDescending(Node *left, Node *right)
-{
-    Node dummy;
-    dummy.next = nullptr;
-    Node *tail = &dummy;
-
-    while (left != nullptr && right != nullptr)
+    Node *mergeAscending(Node *left, Node *right)
     {
-        if (!isEarlier(left->data, right->data))
+        Node dummy;
+        dummy.next = nullptr;
+        Node *tail = &dummy;
+
+        while (left != nullptr && right != nullptr)
         {
-            tail->next = left;
-            left = left->next;
+            if (!isLater(left->data, right->data))
+            {
+                tail->next = left;
+                left = left->next;
+            }
+            else
+            {
+                tail->next = right;
+                right = right->next;
+            }
+            tail = tail->next;
         }
-        else
+
+        tail->next = (left != nullptr) ? left : right;
+        return dummy.next;
+    }
+
+    Node *mergeDescending(Node *left, Node *right)
+    {
+        Node dummy;
+        dummy.next = nullptr;
+        Node *tail = &dummy;
+
+        while (left != nullptr && right != nullptr)
         {
-            tail->next = right;
-            right = right->next;
+            if (!isEarlier(left->data, right->data))
+            {
+                tail->next = left;
+                left = left->next;
+            }
+            else
+            {
+                tail->next = right;
+                right = right->next;
+            }
+            tail = tail->next;
         }
-        tail = tail->next;
+
+        tail->next = (left != nullptr) ? left : right;
+        return dummy.next;
     }
 
-    tail->next = (left != nullptr) ? left : right;
-    return dummy.next;
-}
-
-Node *mergeSortAscending(Node *head)
-{
-    if (head == nullptr || head->next == nullptr)
+    Node *mergeSortAscending(Node *head)
     {
-        return head;
+        if (head == nullptr || head->next == nullptr)
+        {
+            return head;
+        }
+
+        Node *secondHalf = splitList(head);
+
+        Node *left = mergeSortAscending(head);
+        Node *right = mergeSortAscending(secondHalf);
+
+        return mergeAscending(left, right);
     }
 
-    Node *secondHalf = splitList(head);
-
-    Node *left = mergeSortAscending(head);
-    Node *right = mergeSortAscending(secondHalf);
-
-    return mergeAscending(left, right);
-}
-
-Node *mergeSortDescending(Node *head)
-{
-    if (head == nullptr || head->next == nullptr)
+    Node *mergeSortDescending(Node *head)
     {
-        return head;
+        if (head == nullptr || head->next == nullptr)
+        {
+            return head;
+        }
+
+        Node *secondHalf = splitList(head);
+
+        Node *left = mergeSortDescending(head);
+        Node *right = mergeSortDescending(secondHalf);
+
+        return mergeDescending(left, right);
     }
 
-    Node *secondHalf = splitList(head);
-
-    Node *left = mergeSortDescending(head);
-    Node *right = mergeSortDescending(secondHalf);
-
-    return mergeDescending(left, right);
-}
-
-void refreshTail(LinkedList &list)
-{
-    list.tail = list.head;
-    while (list.tail != nullptr && list.tail->next != nullptr)
+    void refreshTail(LinkedList &list)
     {
-        list.tail = list.tail->next;
+        list.tail = list.head;
+        while (list.tail != nullptr && list.tail->next != nullptr)
+        {
+            list.tail = list.tail->next;
+        }
     }
-}
 }
 
 void sortByScheduleASC(LinkedList &list)
