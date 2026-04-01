@@ -3,7 +3,6 @@
 #include <iomanip>
 #include <thread>
 #include <limits>
-
 #include "linkedList.h"
 #include "queue.h"
 #include "stack.h"
@@ -177,12 +176,17 @@ void addNewReservation(Reservation &user, Queue &queue, Stack &stack, sqlite3 *d
         cout << "\nChecking available time slots";
     }
 
-    if (saveReservation(db, createNode(user))) {
+    Node *reservationNode = createNode(user);
+    bool isSaved = saveReservation(db, reservationNode);
+    delete reservationNode;
+
+    if (isSaved) {
         updateStatus(db, user.niu, "Accepted");
         
         user.status = "Accepted"; 
         
         enqueue(queue, user);
+        sortByScheduleASC(queue);
         push(stack, user);
 
         cout << "\nAdding new reservation";
@@ -296,6 +300,7 @@ void inputSchedule(Reservation &user)
 
 void showReservationQueue(Reservation &user, Queue &queue, Stack &stack, sqlite3 *db)
 {
+    sortByScheduleASC(queue);
     showQueue(queue);
     continueOrLogout(user, queue, stack, db);
 }
