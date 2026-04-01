@@ -1,5 +1,37 @@
 #include "validation.h"
 #include <sstream>
+using namespace std;
+
+bool parseDateInput(const string &input, int &day, int &month, int &year) {
+    char dash1, dash2;
+    stringstream ss(input);
+
+    if (!(ss >> day >> dash1 >> month >> dash2 >> year)) return false;
+    if (dash1 != '-' || dash2 != '-') return false;
+
+    ss >> ws;
+    return ss.eof();
+}
+
+bool parseTimeInput(const string &input, int &hour, int &minutes) {
+    char colon;
+    stringstream ss(input);
+
+    if (!(ss >> hour >> colon >> minutes)) return false;
+    if (colon != ':') return false;
+
+    ss >> ws;
+    return ss.eof();
+}
+
+bool parseDurationInput(const string &input, int &duration) {
+    stringstream ss(input);
+
+    if (!(ss >> duration)) return false;
+
+    ss >> ws;
+    return ss.eof();
+}
 
 bool isLeapYear(int year) {
     return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);

@@ -3,6 +3,7 @@
 #include <chrono>
 #include <iomanip>
 #include <thread>
+#include <limits>
 
 #include "linkedList.h"
 #include "queue.h"
@@ -215,39 +216,75 @@ void addNewReservation(Reservation &user, Queue &queue, Stack &stack, sqlite3 *d
 
 void inputSchedule(Reservation &user)
 {
-    char dash1, dash2;
+    string dateInput, timeInput, durationInput;
 
-    cout << "\nEnter the date of reservation (DD-MM-YYYY): ";
-    cin >> user.date_day >> dash1 >> user.date_month >> dash2 >> user.date_year;
-
-    while (!isValidDate(user.date_day, user.date_month, user.date_year))
+    while (true)
     {
-        cout << "Invalid date! Please enter the valid date (DD-MM-YYYY): ";
-        cin >> user.date_day >> dash1 >> user.date_month >> dash2 >> user.date_year;
+        cout << "\nEnter the date of reservation (DD-MM-YYYY): ";
+
+        getline(cin >> ws, dateInput);
+
+        if (!parseDateInput(dateInput, user.date_day, user.date_month, user.date_year))
+        {
+            cout << "Invalid date format! Please use DD-MM-YYYY." << endl;
+            continue;
+        }
+
+        if (!isValidDate(user.date_day, user.date_month, user.date_year))
+        {
+            cout << "Invalid date! Please enter the valid date (DD-MM-YYYY)." << endl;
+            continue;
+        }
+
+        if (isPassedDate(user.date_day, user.date_month, user.date_year))
+        {
+            cout << "Date has already passed! Please enter a valid date (DD-MM-YYYY)." << endl;
+            continue;
+        }
+
+        break;
     }
 
-    while (isPassedDate(user.date_day, user.date_month, user.date_year))
+    while (true)
     {
-        cout << "Date has already passed! Please enter a valid date (DD-MM-YYYY): ";
-        cin >> user.date_day >> dash1 >> user.date_month >> dash2 >> user.date_year;
+        cout << "\nEnter the start time of reservation (HH:MM): ";
+
+        getline(cin >> ws, timeInput);
+
+        if (!parseTimeInput(timeInput, user.time_start_hour, user.time_start_minutes))
+        {
+            cout << "Invalid time format! Please use HH:MM." << endl;
+            continue;
+        }
+
+        if (!isValidTime(user.time_start_hour, user.time_start_minutes))
+        {
+            cout << "Invalid time! Please enter the valid start time (HH:MM)." << endl;
+            continue;
+        }
+
+        break;
     }
 
-    cout << "\nEnter the start time of reservation (HH:MM): ";
-    cin >> user.time_start_hour >> dash1 >> user.time_start_minutes;
-
-    while (!isValidTime(user.time_start_hour, user.time_start_minutes))
+    while (true)
     {
-        cout << "Invalid time! Please enter the valid start time (HH:MM): ";
-        cin >> user.time_start_hour >> dash1 >> user.time_start_minutes;
-    }
+        cout << "\nEnter the duration of reservation (in minutes): ";
 
-    cout << "\nEnter the duration of reservation (in minutes): ";
-    cin >> user.duration;
+        getline(cin >> ws, durationInput);
 
-    while (!isValidDuration(user.duration))
-    {
-        cout << "Invalid duration! Please enter the valid duration (in minutes): ";
-        cin >> user.duration;
+        if (!parseDurationInput(durationInput, user.duration))
+        {
+            cout << "Invalid duration! Please enter a number in minutes." << endl;
+            continue;
+        }
+
+        if (!isValidDuration(user.duration))
+        {
+            cout << "Invalid duration! Please enter the valid duration (in minutes)." << endl;
+            continue;
+        }
+
+        break;
     }
 
     int totalMinutes = user.time_start_hour * 60 + user.time_start_minutes + user.duration;
