@@ -14,7 +14,8 @@ bool isStackEmpty(const Stack &s) {
 
 void push(Stack &s, const Reservation &data) {
     Node* newNode = createNode(data);
-    insertFront(s, newNode);          
+    insertFront(s, newNode);        
+    sortByScheduleDESC(s);  
 }
 
 

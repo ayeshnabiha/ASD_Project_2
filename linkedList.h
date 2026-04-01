@@ -52,7 +52,8 @@ void displayList(const LinkedList &list, const std::string &label = "Data Reserv
 Node *cancelReservation(LinkedList &list, const std::string &niu);
 
 bool isLater(const Reservation &a, const Reservation &b);
-void sortBySchedule(LinkedList &list);
+void sortByScheduleASC(LinkedList &list);
+void sortByScheduleDESC(LinkedList &list);
 void freeList(LinkedList &list);
 
 #endif

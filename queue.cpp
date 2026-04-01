@@ -12,6 +12,7 @@ void enqueue(Queue &queue, const Reservation &data)
 {
     Node* newNode = createNode(data);
     insertEnd(queue, newNode);
+    sortByScheduleASC(queue);
 }
 
 // Function to remove the front element of the queue

@@ -48,8 +48,7 @@ void closeDatabase(sqlite3* db) {
 bool saveReservation(sqlite3* db, Node* node) {
     const char* insertSQL = R"(
         INSERT INTO reservations
-        (niu, group_name, date_day, date_month, date_year, purpose, duration, time_start_hour, time_start_minutes, time_stop_hour, time_stop_minutes, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-    )";
+        (niu, group_name, date_day, date_month, date_year, purpose, duration, time_start_hour, time_start_minutes, time_stop_hour, time_stop_minutes, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);)";
 
     sqlite3_stmt* stmt;
     int rc = sqlite3_prepare_v2(db, insertSQL, -1, &stmt, nullptr);
@@ -84,9 +83,7 @@ bool saveReservation(sqlite3* db, Node* node) {
 }
 
 Node* loadReservations(sqlite3* db) {
-    const char* selectSQL = "SELECT niu, group_name, date_day, date_month, date_year, "
-                            "purpose, duration, time_start_hour, time_start_minutes, "
-                            "time_stop_hour, time_stop_minutes, status FROM reservations WHERE status != 'Cancelled';";
+    const char* selectSQL = "SELECT niu, group_name, date_day, date_month, date_year, purpose, duration, time_start_hour, time_start_minutes, time_stop_hour, time_stop_minutes, status FROM reservations WHERE status != 'Cancelled';";
 
     sqlite3_stmt* stmt;
     int rc = sqlite3_prepare_v2(db, selectSQL, -1, &stmt, nullptr);

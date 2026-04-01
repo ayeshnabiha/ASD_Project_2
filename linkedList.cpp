@@ -214,7 +214,14 @@ bool isLater(const Reservation &a, const Reservation &b)
                                                                         b.time_start_hour, b.time_start_minutes);
 }
 
-void sortBySchedule(LinkedList &list)
+bool isEarlier(const Reservation &a, const Reservation &b)
+{
+    return std::tie(a.date_year, a.date_month, a.date_day,
+                    a.time_start_hour, a.time_start_minutes) < std::tie(b.date_year, b.date_month, b.date_day,
+                                                                        b.time_start_hour, b.time_start_minutes);
+}
+
+void sortByScheduleASC(LinkedList &list)
 {
     if (isEmpty(list) || list.head->next == nullptr)
         return;
@@ -231,6 +238,34 @@ void sortBySchedule(LinkedList &list)
         while (curr->next != lptr)
         {
             if (isLater(curr->data, curr->next->data))
+            {
+                std::swap(curr->data, curr->next->data);
+                swapped = true;
+            }
+            curr = curr->next;
+        }
+        lptr = curr;
+
+    } while (swapped);
+}
+
+void sortByScheduleDESC(LinkedList &list)
+{
+    if (isEmpty(list) || list.head->next == nullptr)
+        return;
+
+    bool swapped;
+    Node *curr;
+    Node *lptr = nullptr;
+
+    do
+    {
+        swapped = false;
+        curr = list.head;
+
+        while (curr->next != lptr)
+        {
+            if (isEarlier(curr->data, curr->next->data))
             {
                 std::swap(curr->data, curr->next->data);
                 swapped = true;
