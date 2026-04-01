@@ -152,64 +152,64 @@ void addNewReservation(Reservation &user, Queue &queue, Stack &stack, sqlite3 *d
 
     inputSchedule(user);
 
-    cout << string(50, '-') << endl;
-    cout << "Please check your reservation details" << endl;
-    cout << "Name       : " << user.group_name << endl;
-    cout << "Purpose    : " << (user.purpose == 1 ? "Praktikum" : (user.purpose == 2 ? "Pelatihan" : "Other")) << endl;
-    cout << "Date       : " << user.date_day << "-" << user.date_month << "-" << user.date_year << endl;
-    cout << "Schedule   : " << setfill('0') << setw(2) << user.time_start_hour << ":"  << setw(2) << user.time_start_minutes << " - " << setw(2) << user.time_stop_hour << ":"  << setw(2) << user.time_stop_minutes << endl;
-
     confirm = getYesNoInput("\nConfirm reservation? (Y/N): ");
 
     if (confirm == 'N' || confirm == 'n')
     {
         cout << string(50, '-') << endl;
         addNewReservation(user, queue, stack, db);
+        return;
     }
 
-    cout << "\nChecking available time slots";
+    cout << "\nChecking available time slots" << endl;
+    this_thread::sleep_for(chrono::seconds(1));
 
     while (hasTimeConflict(db, user))
     {
         cout << "\nTime slot is already taken. Please choose another time." << endl;
+        this_thread::sleep_for(chrono::seconds(1));
 
         inputSchedule(user);
-
-        cout << string(50, '-') << endl;
-        cout << "Please check your reservation details" << endl;
-        cout << "Name       : " << user.group_name << endl;
-        cout << "Purpose    : " << (user.purpose == 1 ? "Praktikum" : (user.purpose == 2 ? "Pelatihan" : "Other")) << endl;
-        cout << "Date       : " << user.date_day << "-" << user.date_month << "-" << user.date_year << endl;
-        cout << "Schedule   : " << user.time_start_hour << ":" << user.time_start_minutes << " - " << user.time_stop_hour << ":" << user.time_stop_minutes << endl;
 
         confirm = getYesNoInput("\nConfirm reservation? (Y/N): ");
 
         if (confirm == 'N' || confirm == 'n')
         {
             addNewReservation(user, queue, stack, db);
+            return;
         }
 
         cout << "\nChecking available time slots";
     }
 
-    saveReservation(db, createNode(user));
-    updateStatus(db, user.niu, "Accepted");
-    enqueue(queue, user);
-    push(stack, user);
+    if (saveReservation(db, createNode(user))) {
+        updateStatus(db, user.niu, "Accepted");
+        
+        user.status = "Accepted"; 
+        
+        enqueue(queue, user);
+        push(stack, user);
 
-    this_thread::sleep_for(chrono::seconds(1));
-    cout << "\nAdding new reservation";
-    for (int i = 0; i < 3; i++)
-    {
-        this_thread::sleep_for(chrono::milliseconds(500));
-        cout << ".";
+        this_thread::sleep_for(chrono::seconds(1));
+        cout << "\nAdding new reservation";
+        for (int i = 0; i < 3; i++)
+        {
+            this_thread::sleep_for(chrono::milliseconds(500));
+            cout << ".";
+        }
+        cout << endl;
+        this_thread::sleep_for(chrono::seconds(1));
+        cout << string(50, '-') << endl;
+        this_thread::sleep_for(chrono::seconds(1));
+
+        showReservationDetails(user, stack, db);
+    } else {
+        cout << "\nFailed to add reservation." << endl;
+        this_thread::sleep_for(chrono::seconds(1));
+        cout << "\nReturning to main menu";
+        this_thread::sleep_for(chrono::seconds(1));
     }
-    cout << endl;
-    this_thread::sleep_for(chrono::seconds(1));
-    cout << string(50, '-') << endl;
-    this_thread::sleep_for(chrono::seconds(1));
 
-    showReservationDetails(user, stack, db);
     continueOrLogout(user, queue, stack, db);
 }
 
@@ -247,6 +247,13 @@ void inputSchedule(Reservation &user)
     int totalMinutes = user.time_start_hour * 60 + user.time_start_minutes + user.duration;
     user.time_stop_hour = (totalMinutes / 60) % 24; 
     user.time_stop_minutes = totalMinutes % 60;
+
+    cout << string(50, '-') << endl;
+    cout << "Please check your reservation details" << endl;
+    cout << "Name       : " << user.group_name << endl;
+    cout << "Purpose    : " << (user.purpose == 1 ? "Praktikum" : (user.purpose == 2 ? "Pelatihan" : "Other")) << endl;
+    cout << "Date       : " << setfill('0') << setw(2) << user.date_day << "-" << setfill('0') << setw(2) << user.date_month << "-" << user.date_year << endl;
+    cout << "Schedule   : " << setfill('0') << setw(2) << user.time_start_hour << ":" << setfill('0') << setw(2) << user.time_start_minutes << " - " << setfill('0') << setw(2) << user.time_stop_hour << ":" << setfill('0') << setw(2) << user.time_stop_minutes << endl;
 }
 
 void showReservationQueue(Reservation &user, Queue &queue, Stack &stack, sqlite3 *db)

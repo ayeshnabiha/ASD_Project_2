@@ -173,7 +173,7 @@ Node* getReservationsByNIU(sqlite3* db, const std::string& niu) {
 }
 
 bool hasTimeConflict(sqlite3* db, const Reservation& r) {
-    const char* querySQL =  "SELECT niu, time_start_hour, time_start_minutes, time_stop_hour, time_stop_minutes FROM reservations WHERE date_day = ? AND date_month = ? AND date_year = ? AND status != 'Cancelled';";
+    const char* querySQL =  "SELECT time_start_hour, time_start_minutes, duration FROM reservations WHERE date_day = ? AND date_month = ? AND date_year = ? AND status != 'Cancelled';";
 
     sqlite3_stmt* stmt;
     int rc = sqlite3_prepare_v2(db, querySQL, -1, &stmt, nullptr);
@@ -188,18 +188,17 @@ bool hasTimeConflict(sqlite3* db, const Reservation& r) {
     sqlite3_bind_int(stmt, 3, r.date_year);
 
     int newStart = r.time_start_hour * 60 + r.time_start_minutes;
-    int newStop  = r.time_stop_hour  * 60 + r.time_stop_minutes;
+    int newStop = newStart + r.duration;
 
     bool conflict = false;
 
     while (sqlite3_step(stmt) == SQLITE_ROW) {
-        std::string existingNiu = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
-        
-        if (existingNiu == r.niu) continue;
+        int existStartH = sqlite3_column_int(stmt, 0);
+        int existStartM = sqlite3_column_int(stmt, 1);
+        int existDur = sqlite3_column_int(stmt, 2);
 
-        int existStart = sqlite3_column_int(stmt, 1) * 60 + sqlite3_column_int(stmt, 2);
-        int existStop  = sqlite3_column_int(stmt, 3) * 60 + sqlite3_column_int(stmt, 4);
-
+        int existStart = existStartH * 60 + existStartM;
+        int existStop  = existStart + existDur;
         if (newStart < existStop && newStop > existStart) {
             conflict = true;
             break;
