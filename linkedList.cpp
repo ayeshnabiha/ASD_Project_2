@@ -223,21 +223,20 @@ bool isEarlier(const Reservation &a, const Reservation &b)
 
 void sortByScheduleASC(LinkedList &list)
 {
-    if (isEmpty(list) || list.head->next == nullptr)
+    if (isEmpty(list) || list.head == nullptr || list.head->next == nullptr)
         return;
 
     bool swapped;
     Node *curr;
     Node *lptr = nullptr;
-
     do
     {
         swapped = false;
         curr = list.head;
 
-        while (curr->next != lptr)
+        while (curr != nullptr && curr->next != lptr)
         {
-            if (isLater(curr->data, curr->next->data))
+            if (curr->next != nullptr && isLater(curr->data, curr->next->data))
             {
                 std::swap(curr->data, curr->next->data);
                 swapped = true;
@@ -251,28 +250,27 @@ void sortByScheduleASC(LinkedList &list)
 
 void sortByScheduleDESC(LinkedList &list)
 {
-    if (isEmpty(list) || list.head->next == nullptr)
+    if (isEmpty(list) || list.head == nullptr || list.head->next == nullptr)
         return;
 
     bool swapped;
     Node *curr;
     Node *lptr = nullptr;
-
     do
     {
         swapped = false;
         curr = list.head;
 
-        while (curr->next != lptr)
+        while (curr != nullptr && curr->next != lptr)
         {
-            if (isEarlier(curr->data, curr->next->data))
+            if (curr->next != nullptr && isEarlier(curr->data, curr->next->data))
             {
                 std::swap(curr->data, curr->next->data);
                 swapped = true;
             }
             curr = curr->next;
         }
-        lptr = curr;
+        lptr = curr; 
 
     } while (swapped);
 }

@@ -32,6 +32,7 @@ int main()
     sqlite3 *db;
 
     initList(queue);
+    initStack(stack);
     initDatabase(&db, "reservations.db");
 
     Node *savedData = loadReservations(db);
@@ -243,14 +244,9 @@ void inputSchedule(Reservation &user)
         cin >> user.duration;
     }
 
-    user.time_stop_hour = user.time_start_hour + (user.duration / 60);
-    user.time_stop_minutes = user.time_start_minutes + (user.duration % 60);
-
-    if (user.time_stop_minutes >= 60)
-    {
-        user.time_stop_hour += user.time_stop_minutes / 60;
-        user.time_stop_minutes %= 60;
-    }
+    int totalMinutes = user.time_start_hour * 60 + user.time_start_minutes + user.duration;
+    user.time_stop_hour = (totalMinutes / 60) % 24; 
+    user.time_stop_minutes = totalMinutes % 60;
 }
 
 void showReservationQueue(Reservation &user, Queue &queue, Stack &stack, sqlite3 *db)
