@@ -37,14 +37,14 @@ int main()
     initDatabase(&db, "reservations.db");
 
     Node *savedData = loadReservations(db);
-    while (savedData != nullptr)
-    {
-        enqueue(queue, savedData->data);
-        savedData = savedData->next;
-    }
+    enqueueLoadedDataAscending(queue, savedData);
 
     userLogin(user);
     displayMenu(user, queue, stack, db);
+
+    freeList(queue);
+    freeList(stack);
+    closeDatabase(db);
 
     return 0;
 }
@@ -318,13 +318,7 @@ void showReservationHistory(Reservation &user, Queue &queue, Stack &stack, sqlit
     initStack(history);
 
     Node *head = getReservationsByNIU(db, user.niu);
-
-    Node *temp = head;
-    while (temp != nullptr)
-    {
-        push(history, temp->data);
-        temp = temp->next;
-    }
+    pushLoadedDataDescending(history, head);
 
     displayStack(history);
 

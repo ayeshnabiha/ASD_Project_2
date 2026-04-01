@@ -221,31 +221,126 @@ bool isEarlier(const Reservation &a, const Reservation &b)
                                                                         b.time_start_hour, b.time_start_minutes);
 }
 
+namespace
+{
+Node *splitList(Node *head)
+{
+    if (head == nullptr || head->next == nullptr)
+    {
+        return nullptr;
+    }
+
+    Node *slow = head;
+    Node *fast = head->next;
+
+    while (fast != nullptr && fast->next != nullptr)
+    {
+        slow = slow->next;
+        fast = fast->next->next;
+    }
+
+    Node *secondHalf = slow->next;
+    slow->next = nullptr;
+    return secondHalf;
+}
+
+Node *mergeAscending(Node *left, Node *right)
+{
+    Node dummy;
+    dummy.next = nullptr;
+    Node *tail = &dummy;
+
+    while (left != nullptr && right != nullptr)
+    {
+        if (!isLater(left->data, right->data))
+        {
+            tail->next = left;
+            left = left->next;
+        }
+        else
+        {
+            tail->next = right;
+            right = right->next;
+        }
+        tail = tail->next;
+    }
+
+    tail->next = (left != nullptr) ? left : right;
+    return dummy.next;
+}
+
+Node *mergeDescending(Node *left, Node *right)
+{
+    Node dummy;
+    dummy.next = nullptr;
+    Node *tail = &dummy;
+
+    while (left != nullptr && right != nullptr)
+    {
+        if (!isEarlier(left->data, right->data))
+        {
+            tail->next = left;
+            left = left->next;
+        }
+        else
+        {
+            tail->next = right;
+            right = right->next;
+        }
+        tail = tail->next;
+    }
+
+    tail->next = (left != nullptr) ? left : right;
+    return dummy.next;
+}
+
+Node *mergeSortAscending(Node *head)
+{
+    if (head == nullptr || head->next == nullptr)
+    {
+        return head;
+    }
+
+    Node *secondHalf = splitList(head);
+
+    Node *left = mergeSortAscending(head);
+    Node *right = mergeSortAscending(secondHalf);
+
+    return mergeAscending(left, right);
+}
+
+Node *mergeSortDescending(Node *head)
+{
+    if (head == nullptr || head->next == nullptr)
+    {
+        return head;
+    }
+
+    Node *secondHalf = splitList(head);
+
+    Node *left = mergeSortDescending(head);
+    Node *right = mergeSortDescending(secondHalf);
+
+    return mergeDescending(left, right);
+}
+
+void refreshTail(LinkedList &list)
+{
+    list.tail = list.head;
+    while (list.tail != nullptr && list.tail->next != nullptr)
+    {
+        list.tail = list.tail->next;
+    }
+}
+}
+
 void sortByScheduleASC(LinkedList &list)
 {
     if (isEmpty(list) || list.head == nullptr || list.head->next == nullptr)
         return;
 
-    bool swapped;
-    Node *curr;
-    Node *lptr = nullptr;
-    do
-    {
-        swapped = false;
-        curr = list.head;
-
-        while (curr != nullptr && curr->next != lptr)
-        {
-            if (curr->next != nullptr && isLater(curr->data, curr->next->data))
-            {
-                std::swap(curr->data, curr->next->data);
-                swapped = true;
-            }
-            curr = curr->next;
-        }
-        lptr = curr;
-
-    } while (swapped);
+    list.head = mergeSortAscending(list.head);
+    refreshTail(list);
 }
 
 void sortByScheduleDESC(LinkedList &list)
@@ -253,26 +348,8 @@ void sortByScheduleDESC(LinkedList &list)
     if (isEmpty(list) || list.head == nullptr || list.head->next == nullptr)
         return;
 
-    bool swapped;
-    Node *curr;
-    Node *lptr = nullptr;
-    do
-    {
-        swapped = false;
-        curr = list.head;
-
-        while (curr != nullptr && curr->next != lptr)
-        {
-            if (curr->next != nullptr && isEarlier(curr->data, curr->next->data))
-            {
-                std::swap(curr->data, curr->next->data);
-                swapped = true;
-            }
-            curr = curr->next;
-        }
-        lptr = curr; 
-
-    } while (swapped);
+    list.head = mergeSortDescending(list.head);
+    refreshTail(list);
 }
 
 void freeList(LinkedList &list)

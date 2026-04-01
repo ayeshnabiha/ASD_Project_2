@@ -10,6 +10,9 @@ void initQueue(Queue &queue);
 // Function for FIFO 
 void enqueue(Queue &queue, const Reservation &data);
 
+// Sort loaded data ascending, then enqueue one-by-one (FIFO enqueue)
+void enqueueLoadedDataAscending(Queue &queue, Node *loadedHead);
+
 // Function to remove the front element of the queue
 Node* dequeue(Queue &queue);
 

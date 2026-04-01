@@ -12,7 +12,32 @@ void enqueue(Queue &queue, const Reservation &data)
 {
     Node* newNode = createNode(data);
     insertEnd(queue, newNode);
-    sortByScheduleASC(queue);
+}
+
+void enqueueLoadedDataAscending(Queue &queue, Node *loadedHead)
+{
+    LinkedList loadedList;
+    initList(loadedList);
+
+    Node *current = loadedHead;
+    while (current != nullptr)
+    {
+        Node *nextNode = current->next;
+        current->next = nullptr;
+        insertEnd(loadedList, current);
+        current = nextNode;
+    }
+
+    sortByScheduleASC(loadedList);
+
+    current = loadedList.head;
+    while (current != nullptr)
+    {
+        enqueue(queue, current->data);
+        Node *nextNode = current->next;
+        delete current;
+        current = nextNode;
+    }
 }
 
 // Function to remove the front element of the queue

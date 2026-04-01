@@ -14,8 +14,32 @@ bool isStackEmpty(const Stack &s) {
 
 void push(Stack &s, const Reservation &data) {
     Node* newNode = createNode(data);
-    insertFront(s, newNode);        
-    sortByScheduleDESC(s);  
+    insertFront(s, newNode);
+}
+
+void pushLoadedDataDescending(Stack &s, Node *loadedHead) {
+    LinkedList loadedList;
+    initList(loadedList);
+
+    Node *current = loadedHead;
+    while (current != nullptr)
+    {
+        Node *nextNode = current->next;
+        current->next = nullptr;
+        insertEnd(loadedList, current);
+        current = nextNode;
+    }
+
+    sortByScheduleASC(loadedList);
+
+    current = loadedList.head;
+    while (current != nullptr)
+    {
+        push(s, current->data);
+        Node *nextNode = current->next;
+        delete current;
+        current = nextNode;
+    }
 }
 
 
