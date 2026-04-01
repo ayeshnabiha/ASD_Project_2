@@ -4,6 +4,7 @@
 #include "linkedList.h"
 
 bool isLeapYear(int year);
+bool isPassedDate(int day, int month, int year);
 bool isValidDate(int day, int month, int year);
 bool isValidTime(int hour, int minutes);
 bool isValidDuration(int duration);

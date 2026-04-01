@@ -5,6 +5,21 @@ bool isLeapYear(int year) {
     return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
 }
 
+bool isPassedDate(int day, int month, int year) {
+    time_t t = time(nullptr);
+    tm *currentTime = localtime(&t);
+
+    int currentYear = currentTime->tm_year + 1900;
+    int currentMonth = currentTime->tm_mon + 1;
+    int currentDay = currentTime->tm_mday;
+
+    if (year < currentYear) return true;
+    if (year == currentYear && month < currentMonth) return true;
+    if (year == currentYear && month == currentMonth && day < currentDay) return true;
+
+    return false;
+}
+
 bool isValidDate(int day, int month, int year) {
     if (year < 2000 || year > 2100) return false;
     if (month < 1 || month > 12) return false;

@@ -226,6 +226,12 @@ void inputSchedule(Reservation &user)
         cin >> user.date_day >> dash1 >> user.date_month >> dash2 >> user.date_year;
     }
 
+    while (isPassedDate(user.date_day, user.date_month, user.date_year))
+    {
+        cout << "Date has already passed! Please enter a valid date (DD-MM-YYYY): ";
+        cin >> user.date_day >> dash1 >> user.date_month >> dash2 >> user.date_year;
+    }
+
     cout << "\nEnter the start time of reservation (HH:MM): ";
     cin >> user.time_start_hour >> dash1 >> user.time_start_minutes;
 
