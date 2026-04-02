@@ -3,6 +3,7 @@
 #include <iomanip>
 #include <thread>
 #include <limits>
+#include <cctype>
 #include "linkedList.h"
 #include "queue.h"
 #include "stack.h"
@@ -53,8 +54,18 @@ void userLogin(Reservation &user)
     cout << string(50, '-') << "\n";
     cout << "Please enter your 6-digit NIU: ";
 
+    auto isValidNIU = [](const string &s)
+    {
+        if (s.length() != 6)
+            return false;
+        for (char c : s)
+            if (!isdigit(c))
+                return false;
+        return true;
+    };
+
     cin >> user.niu;
-    while (user.niu.length() != 6)
+    while (!isValidNIU(user.niu))
     {
         cout << "Invalid NIU! Please enter a valid 6-digit NIU: ";
         cin >> user.niu;
@@ -71,8 +82,23 @@ void displayMenu(Reservation &user, Queue &queue, Stack &stack, sqlite3 *db)
     cout << "2. Show reservation queue" << endl;
     cout << "3. Show reservation history" << endl;
 
-    cout << "\nPlease select an option : ";
-    cin >> menu;
+    while (true)
+    {
+        cout << "\nPlease select an option : ";
+
+        if (!(cin >> menu))
+        {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << "Invalid option! Please select 1, 2, or 3.\n";
+            continue;
+        }
+
+        if (menu == 1 || menu == 2 || menu == 3)
+            break;
+
+        cout << "Invalid option! Please select 1, 2, or 3.\n";
+    }
 
     cout << string(50, '-') << "\n";
 
@@ -86,7 +112,7 @@ void displayMenu(Reservation &user, Queue &queue, Stack &stack, sqlite3 *db)
     }
     else if (menu == 3)
     {
-        showReservationHistory(user, queue,stack, db);
+        showReservationHistory(user, queue, stack, db);
     }
 }
 
@@ -100,8 +126,24 @@ void displayMenuOrLogout(Reservation &user, Queue &queue, Stack &stack, sqlite3 
     cout << "3. Show reservation history" << endl;
     cout << "4. Logout" << endl;
 
-    cout << "\nPlease select an option : ";
-    cin >> menu;
+    while (true)
+    {
+        cout << "\nPlease select an option : ";
+
+        if (!(cin >> menu))
+        {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << "Invalid option! Please select 1, 2, 3, or 4.\n";
+            continue;
+        }
+
+        if (menu >= 1 && menu <= 4)
+            break;
+
+        cout << "Invalid option! Please select 1, 2, 3, or 4.\n";
+    }
+
     cout << string(50, '-') << "\n";
 
     if (menu == 1)
@@ -124,44 +166,28 @@ void displayMenuOrLogout(Reservation &user, Queue &queue, Stack &stack, sqlite3 
 
 void addNewReservation(Reservation &user, Queue &queue, Stack &stack, sqlite3 *db)
 {
-    char confirm;
-
-    cout << "Enter your group name: ";
-    cin.ignore();
-    getline(cin, user.group_name);
-
-    cout << "\nPurpose" << endl;
-    cout << "1. Praktikum" << endl;
-    cout << "2. Pelatihan" << endl;
-    cout << "3. Other" << endl;
-    cout << "Enter the purpose of reservation: ";
-    cin >> user.purpose;
-
-    while (user.purpose != 1 && user.purpose != 2 && user.purpose != 3)
+    while (true)
     {
-        cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        char confirm;
 
-        cout << "Invalid! Please enter one of the options (1, 2, or 3): ";
+        cout << "Enter your group name: ";
+        cin.ignore();
+        getline(cin, user.group_name);
+
+        cout << "\nPurpose" << endl;
+        cout << "1. Praktikum" << endl;
+        cout << "2. Pelatihan" << endl;
+        cout << "3. Other" << endl;
+        cout << "Enter the purpose of reservation: ";
         cin >> user.purpose;
-    }
 
-    inputSchedule(user);
-
-    confirm = getYesNoInput("\nConfirm reservation? (Y/N): ");
-
-    if (confirm == 'N' || confirm == 'n')
-    {
-        cout << string(50, '-') << endl;
-        addNewReservation(user, queue, stack, db);
-        return;
-    }
-
-    cout << "\nChecking available time slots" << endl;
-
-    while (hasTimeConflict(db, user))
-    {
-        cout << "\nTime slot is already taken. Please choose another time." << endl;
+        while (user.purpose != 1 && user.purpose != 2 && user.purpose != 3)
+        {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << "Invalid! Please enter one of the options (1, 2, or 3): ";
+            cin >> user.purpose;
+        }
 
         inputSchedule(user);
 
@@ -169,38 +195,57 @@ void addNewReservation(Reservation &user, Queue &queue, Stack &stack, sqlite3 *d
 
         if (confirm == 'N' || confirm == 'n')
         {
-            addNewReservation(user, queue, stack, db);
-            return;
+            cout << string(50, '-') << endl;
+            continue;
         }
 
-        cout << "\nChecking available time slots";
-    }
+        cout << "\nChecking available time slots" << endl;
 
-    Node *reservationNode = createNode(user);
-    bool isSaved = saveReservation(db, reservationNode);
-    delete reservationNode;
-
-    if (isSaved) {
-        updateStatus(db, user.niu, "Accepted");
-        
-        user.status = "Accepted"; 
-        
-        enqueue(queue, user);
-        sortByScheduleASC(queue);
-        push(stack, user);
-
-        cout << "\nAdding new reservation";
-        for (int i = 0; i < 3; i++)
+        while (hasTimeConflict(db, user))
         {
-            cout << ".";
-        }
-        cout << endl;
-        cout << string(50, '-') << endl;
+            cout << "\nTime slot is already taken. Please choose another time." << endl;
+            inputSchedule(user);
+            confirm = getYesNoInput("\nConfirm reservation? (Y/N): ");
 
-        showReservationDetails(user, stack, db);
-    } else {
-        cout << "\nFailed to add reservation." << endl;
-        cout << "\nReturning to main menu";
+            if (confirm == 'N' || confirm == 'n')
+            {
+                cout << string(50, '-') << endl;
+                break;
+            }
+
+            cout << "\nChecking available time slots";
+        }
+
+        if (confirm == 'N' || confirm == 'n')
+            continue;
+
+        Node *reservationNode = createNode(user);
+        bool isSaved = saveReservation(db, reservationNode);
+        delete reservationNode;
+
+        if (isSaved)
+        {
+            updateStatus(db, user.niu, "Accepted");
+            user.status = "Accepted";
+            enqueue(queue, user);
+            sortByScheduleASC(queue);
+            push(stack, user);
+
+            cout << "\nAdding new reservation";
+            for (int i = 0; i < 3; i++)
+                cout << ".";
+            cout << endl;
+            cout << string(50, '-') << endl;
+
+            showReservationDetails(user, stack, db);
+        }
+        else
+        {
+            cout << "\nFailed to add reservation." << endl;
+            cout << "\nReturning to main menu";
+        }
+
+        break;
     }
 
     continueOrLogout(user, queue, stack, db);
@@ -256,7 +301,7 @@ void inputSchedule(Reservation &user)
         }
 
         if (isPassedStartTime(user.date_day, user.date_month, user.date_year,
-                                     user.time_start_hour, user.time_start_minutes))
+                              user.time_start_hour, user.time_start_minutes))
         {
             cout << "Start time has already passed for today! Please enter a future time (HH:MM)." << endl;
             continue;
@@ -287,7 +332,7 @@ void inputSchedule(Reservation &user)
     }
 
     int totalMinutes = user.time_start_hour * 60 + user.time_start_minutes + user.duration;
-    user.time_stop_hour = (totalMinutes / 60) % 24; 
+    user.time_stop_hour = (totalMinutes / 60) % 24;
     user.time_stop_minutes = totalMinutes % 60;
 
     cout << string(50, '-') << endl;
