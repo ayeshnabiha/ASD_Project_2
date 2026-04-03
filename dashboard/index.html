@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lab Reservation Dashboard</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg1: #ffffff; --bg2: #f5f4f0; --bg3: #eeede8;
+    --bg-info: #e6f1fb; --bg-success: #eaf3de; --bg-warn: #faeeda; --bg-danger: #fcebeb;
+    --tx1: #1a1a18; --tx2: #5f5e5a; --tx3: #888780;
+    --tx-info: #185fa5; --tx-success: #3b6d11; --tx-warn: #854f0b; --tx-danger: #a32d2d;
+    --br: rgba(0,0,0,0.12); --br2: rgba(0,0,0,0.22);
+    --br-info: #85b7eb; --br-success: #97c459; --br-warn: #ef9f27; --br-danger: #f09595;
+    --font: 'Segoe UI', system-ui, sans-serif;
+    --r: 8px; --rl: 12px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg1:#1e1e1c; --bg2:#282825; --bg3:#323230;
+      --bg-info:#042c53; --bg-success:#173404; --bg-warn:#412402; --bg-danger:#501313;
+      --tx1:#e8e6de; --tx2:#b4b2a9; --tx3:#888780;
+      --tx-info:#85b7eb; --tx-success:#97c459; --tx-warn:#ef9f27; --tx-danger:#f09595;
+      --br:rgba(255,255,255,0.1); --br2:rgba(255,255,255,0.2);
+    }
+  }
+
+  body { font-family: var(--font); background: var(--bg3); color: var(--tx1); min-height: 100vh; padding: 1.5rem; }
+  input, select { font-family: var(--font); font-size: 14px; color: var(--tx1); background: var(--bg1); border: 0.5px solid var(--br2); border-radius: var(--r); padding: 8px 12px; outline: none; transition: border-color .15s; width: 100%; }
+  input:focus, select:focus { border-color: var(--tx1); }
+
+  .wrap { max-width: 780px; margin: 0 auto; }
+  .topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; }
+  .topbar h1 { font-size:16px; font-weight:500; }
+  .badge-niu { font-size:12px; padding:4px 10px; background:var(--bg-info); color:var(--tx-info); border-radius:var(--r); }
+
+  .stats { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin-bottom:1.5rem; }
+  .stat { background:var(--bg2); border-radius:var(--r); padding:14px 16px; }
+  .stat-label { font-size:12px; color:var(--tx2); margin-bottom:6px; }
+  .stat-value { font-size:22px; font-weight:500; }
+  .stat-sub { font-size:11px; color:var(--tx3); margin-top:2px; }
+
+  .tabs { display:flex; border-bottom:0.5px solid var(--br); margin-bottom:1rem; }
+  .tab { padding:8px 16px; font-size:13px; color:var(--tx2); cursor:pointer; border-bottom:2px solid transparent; transition:color .15s; }
+  .tab.active { color:var(--tx1); border-bottom-color:var(--tx1); font-weight:500; }
+
+  .section { display:none; }
+  .section.active { display:block; }
+
+  /* cards */
+  .card { background:var(--bg1); border:0.5px solid var(--br); border-radius:var(--rl); padding:1.25rem; }
+  .queue-item { background:var(--bg1); border:0.5px solid var(--br); border-radius:var(--rl); padding:14px 16px; margin-bottom:10px; display:grid; grid-template-columns:28px 1fr auto; gap:10px; align-items:start; }
+  .q-num { font-size:13px; font-weight:500; color:var(--tx3); padding-top:1px; }
+  .q-name { font-size:14px; font-weight:500; }
+  .q-meta { font-size:12px; color:var(--tx2); margin-top:3px; }
+  .q-right { text-align:right; }
+  .q-time { font-size:12px; color:var(--tx2); }
+  .q-date { font-size:11px; color:var(--tx3); margin-top:2px; }
+
+  .history-item { background:var(--bg1); border:0.5px solid var(--br); border-radius:var(--rl); padding:14px 16px; margin-bottom:10px; }
+  .history-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+  .history-grid { display:grid; grid-template-columns:1fr 1fr; gap:4px 12px; margin-top:6px; }
+  .hf { font-size:12px; color:var(--tx2); }
+  .hv { font-size:12px; }
+
+  /* badges */
+  .badge { display:inline-block; font-size:11px; padding:2px 8px; border-radius:99px; margin-top:4px; font-weight:500; }
+  .b-accepted { background:var(--bg-success); color:var(--tx-success); }
+  .b-pending   { background:var(--bg-warn);    color:var(--tx-warn); }
+  .b-completed { background:var(--bg2);         color:var(--tx2); }
+  .b-cancelled { background:var(--bg-danger);  color:var(--tx-danger); }
+
+  /* purpose dots */
+  .dot { display:inline-block; width:6px; height:6px; border-radius:50%; margin-right:5px; vertical-align:middle; }
+  .d1 { background:#178BD4; } .d2 { background:#1D9E75; } .d3 { background:#9acd52; }
+
+  /* form */
+  .form-row { margin-bottom:14px; }
+  .form-label { font-size:12px; color:var(--tx2); margin-bottom:5px; display:block; }
+  .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .btn-row { display:flex; gap:8px; margin-top:1rem; }
+  .btn-primary { background:var(--tx1); color:var(--bg1); border:none; border-radius:var(--r); padding:8px 18px; font-size:13px; cursor:pointer; font-family:var(--font); }
+  .btn-primary:hover { opacity:.85; }
+  .btn-ghost { background:transparent; color:var(--tx2); border:0.5px solid var(--br2); border-radius:var(--r); padding:8px 18px; font-size:13px; cursor:pointer; font-family:var(--font); }
+  .btn-ghost:hover { background:var(--bg2); }
+
+  .alert { border-radius:var(--r); padding:10px 14px; font-size:12px; margin-top:10px; display:none; }
+  .alert-danger  { background:var(--bg-danger);  border:0.5px solid var(--br-danger);  color:var(--tx-danger); }
+  .alert-success { background:var(--bg-success); border:0.5px solid var(--br-success); color:var(--tx-success); }
+  .alert-info    { background:var(--bg-info);    border:0.5px solid var(--br-info);    color:var(--tx-info); }
+
+  /* arch */
+  .arch-box { background:var(--bg2); border-radius:var(--rl); padding:1rem 1.25rem; margin-bottom:10px; }
+  .arch-row { display:flex; gap:10px; margin-bottom:10px; flex-wrap:wrap; }
+  .arch-node { flex:1; border:0.5px solid var(--br); border-radius:var(--r); padding:10px 12px; background:var(--bg1); min-width:110px; }
+  .arch-node-label { font-size:11px; font-weight:500; color:var(--tx2); text-transform:uppercase; letter-spacing:.04em; margin-bottom:4px; }
+  .arch-node-name { font-size:12px; }
+  .arch-arrow { display:flex; align-items:center; justify-content:center; font-size:16px; color:var(--tx3); padding:0 2px; }
+  .arch-desc { font-size:12px; color:var(--tx2); line-height:1.5; margin-top:8px; }
+
+  .stack-label { font-size:11px; color:var(--tx3); margin-bottom:6px; display:flex; align-items:center; gap:6px; }
+  .stack-pill { background:var(--bg-info); color:var(--tx-info); font-size:10px; padding:1px 6px; border-radius:99px; }
+
+  .empty { text-align:center; padding:2.5rem 1rem; color:var(--tx3); font-size:13px; }
+  .spinner { text-align:center; padding:2rem; color:var(--tx3); font-size:13px; }
+
+  .server-status { display:flex; align-items:center; gap:6px; font-size:12px; color:var(--tx3); }
+  .status-dot { width:7px; height:7px; border-radius:50%; background:#ccc; }
+  .status-dot.online { background:#3b6d11; }
+  .status-dot.offline { background:var(--tx-danger); }
+
+  @media (max-width:560px) {
+    .stats { grid-template-columns:repeat(2,1fr); }
+    .form-grid { grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <div>
+      <div style="font-size:12px;color:var(--tx2);margin-bottom:2px;">Computer Laboratory</div>
+      <h1>Reservation Dashboard</h1>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div class="server-status">
+        <div class="status-dot" id="sdot"></div>
+        <span id="sstatus">checking server…</span>
+      </div>
+      <span class="badge-niu" id="niu-display">NIU: —</span>
+      <button class="btn-ghost" onclick="showLogin()" style="font-size:12px;padding:5px 12px;">Switch user</button>
+    </div>
+  </div>
+
+  <!-- Login panel -->
+  <div id="login-panel" class="card" style="max-width:360px;margin:0 auto;">
+    <div style="font-size:15px;font-weight:500;margin-bottom:4px;">Welcome</div>
+    <div style="font-size:13px;color:var(--tx2);margin-bottom:1.25rem;">Enter your 6-digit NIU to continue</div>
+
+    <div id="server-warn" class="alert alert-danger" style="display:block;margin-bottom:12px;">
+      Cannot reach server at <strong>localhost:8080</strong>. Make sure you compiled and ran <code>./LabReservationServer</code> first.
+    </div>
+
+    <label class="form-label">NIU</label>
+    <input type="text" id="niu-input" maxlength="6" placeholder="e.g. 123456"
+           oninput="validateNIU(this)" onkeydown="if(event.key==='Enter')doLogin()">
+    <div style="font-size:11px;color:var(--tx-danger);margin-top:4px;height:14px;" id="niu-err"></div>
+    <div class="btn-row" style="margin-top:1rem;">
+      <button class="btn-primary" onclick="doLogin()" style="flex:1;">Sign in</button>
+    </div>
+  </div>
+
+  <!-- Main dashboard (hidden until login) -->
+  <div id="main-panel" style="display:none;">
+    <div class="stats">
+      <div class="stat"><div class="stat-label">Queue length</div><div class="stat-value" id="s-queue">—</div><div class="stat-sub">active reservations</div></div>
+      <div class="stat"><div class="stat-label">Your reservations</div><div class="stat-value" id="s-mine">—</div><div class="stat-sub">in history</div></div>
+      <div class="stat"><div class="stat-label">Next reservation</div><div class="stat-value" id="s-next" style="font-size:14px;padding-top:6px;">—</div><div class="stat-sub">upcoming</div></div>
+      <div class="stat"><div class="stat-label">Accepted</div><div class="stat-value" id="s-accepted">—</div><div class="stat-sub">confirmed bookings</div></div>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('queue',this)">Queue</div>
+      <div class="tab" onclick="switchTab('history',this)">My history</div>
+      <div class="tab" onclick="switchTab('add',this)">Add reservation</div>
+      <div class="tab" onclick="switchTab('arch',this)">Architecture</div>
+    </div>
+
+    <!-- Queue -->
+    <div class="section active" id="tab-queue">
+      <div id="queue-list"><div class="spinner">Loading…</div></div>
+    </div>
+
+    <!-- History -->
+    <div class="section" id="tab-history">
+      <div id="history-list"><div class="spinner">Loading…</div></div>
+    </div>
+
+    <!-- Add -->
+    <div class="section" id="tab-add">
+      <div class="card">
+        <div class="form-row">
+          <label class="form-label">Group name</label>
+          <input type="text" id="f-group" placeholder="e.g. Kelompok 4A">
+        </div>
+        <div class="form-row">
+          <label class="form-label">Purpose</label>
+          <select id="f-purpose">
+            <option value="1">Praktikum</option>
+            <option value="2">Pelatihan</option>
+            <option value="3">Other</option>
+          </select>
+        </div>
+        <div class="form-grid">
+          <div class="form-row">
+            <label class="form-label">Date</label>
+            <input type="date" id="f-date">
+          </div>
+          <div class="form-row">
+            <label class="form-label">Start time</label>
+            <input type="time" id="f-time">
+          </div>
+        </div>
+        <div class="form-row">
+          <label class="form-label">Duration (minutes)</label>
+          <input type="number" id="f-duration" min="1" max="1440" placeholder="e.g. 120">
+        </div>
+        <div id="alert-conflict" class="alert alert-danger">Time slot conflict detected. Please choose another time.</div>
+        <div id="alert-success" class="alert alert-success">Reservation added successfully.</div>
+        <div id="alert-err"     class="alert alert-danger"></div>
+        <div class="btn-row">
+          <button class="btn-primary" onclick="addReservation()">Add reservation</button>
+          <button class="btn-ghost"   onclick="clearForm()">Clear</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Architecture -->
+    <div class="section" id="tab-arch">
+      <div class="arch-box">
+        <div style="font-size:13px;font-weight:500;margin-bottom:12px;">Data structures</div>
+        <div class="arch-row">
+          <div class="arch-node"><div class="arch-node-label">Linked list (base)</div><div class="arch-node-name">LinkedList / Node</div></div>
+          <div class="arch-arrow">→</div>
+          <div class="arch-node"><div class="arch-node-label">Queue (FIFO)</div><div class="arch-node-name">insertEnd / deleteFront</div></div>
+          <div class="arch-arrow">→</div>
+          <div class="arch-node"><div class="arch-node-label">Stack (LIFO)</div><div class="arch-node-name">insertFront / deleteFront</div></div>
+        </div>
+        <div class="arch-desc">Queue stores upcoming reservations sorted ascending by schedule (merge sort). Stack stores history descending — most recent on top (peek shows latest).</div>
+      </div>
+      <div class="arch-box">
+        <div style="font-size:13px;font-weight:500;margin-bottom:12px;">Request flow</div>
+        <div class="arch-row">
+          <div class="arch-node"><div class="arch-node-label">Browser</div><div class="arch-node-name">dashboard/index.html</div></div>
+          <div class="arch-arrow">↕ HTTP</div>
+          <div class="arch-node"><div class="arch-node-label">C++ server</div><div class="arch-node-name">server.cpp · port 8080</div></div>
+          <div class="arch-arrow">↕</div>
+          <div class="arch-node"><div class="arch-node-label">Logic</div><div class="arch-node-name">database / queue / stack / validation</div></div>
+          <div class="arch-arrow">↕</div>
+          <div class="arch-node"><div class="arch-node-label">SQLite</div><div class="arch-node-name">reservations.db</div></div>
+        </div>
+      </div>
+      <div class="arch-box">
+        <div style="font-size:13px;font-weight:500;margin-bottom:8px;">API endpoints</div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;">
+          <div class="arch-node"><div class="arch-node-label">GET /api/reservations</div><div class="arch-node-name">Active queue (sorted ASC)</div></div>
+          <div class="arch-node"><div class="arch-node-label">GET /api/reservations/history</div><div class="arch-node-name">By NIU (stack order, DESC)</div></div>
+          <div class="arch-node"><div class="arch-node-label">POST /api/reservations</div><div class="arch-node-name">Add + conflict check + save</div></div>
+          <div class="arch-node"><div class="arch-node-label">GET /api/conflict</div><div class="arch-node-name">Check slot without writing</div></div>
+          <div class="arch-node"><div class="arch-node-label">GET /api/reservations/all</div><div class="arch-node-name">All rows (for global stats)</div></div>
+        </div>
+      </div>
+      <div class="arch-box">
+        <div style="font-size:13px;font-weight:500;margin-bottom:8px;">Source files (unchanged)</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+          <div class="arch-node"><div class="arch-node-label">src/main.cpp</div><div class="arch-node-name">Terminal UI (original)</div></div>
+          <div class="arch-node"><div class="arch-node-label">src/database.cpp</div><div class="arch-node-name">SQLite CRUD, conflict</div></div>
+          <div class="arch-node"><div class="arch-node-label">src/linkedList.cpp</div><div class="arch-node-name">Node, list ops, merge sort</div></div>
+          <div class="arch-node"><div class="arch-node-label">src/queue.cpp</div><div class="arch-node-name">FIFO enqueue/dequeue</div></div>
+          <div class="arch-node"><div class="arch-node-label">src/stack.cpp</div><div class="arch-node-name">LIFO push/pop/peek</div></div>
+          <div class="arch-node"><div class="arch-node-label">src/validation.cpp</div><div class="arch-node-name">Date/time/duration checks</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = (() => {
+  const host = window.location.hostname;
+  if (!host) return 'http://localhost:8080';
+  return `http://${host}:8080`;
+})();
+let currentNIU = '';
+
+// ── utilities ────────────────────────────────────────────────────────────────
+function pad(n) { return String(n).padStart(2,'0'); }
+function todayISO() {
+  const now = new Date();
+  return `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
+}
+function nowMinutes() {
+  const now = new Date();
+  return now.getHours() * 60 + now.getMinutes();
+}
+function validateScheduleNotPassed(date, timeVal) {
+  if (!date || !timeVal) return { ok: true };
+
+  const selectedDay = new Date(`${date}T00:00:00`);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  if (selectedDay < today) {
+    return { ok: false, message: 'Date has already passed. Choose today or a future date.' };
+  }
+
+  if (date === todayISO()) {
+    const parts = timeVal.split(':');
+    if (parts.length < 2) return { ok: false, message: 'Invalid start time format.' };
+    const selectedMinutes = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+    if (selectedMinutes <= nowMinutes()) {
+      return { ok: false, message: 'Start time has already passed for today. Choose a future time.' };
+    }
+  }
+
+  return { ok: true };
+}
+function badgeClass(s) {
+  if (s==='Accepted')  return 'b-accepted';
+  if (s==='Pending')   return 'b-pending';
+  if (s==='Completed') return 'b-completed';
+  return 'b-cancelled';
+}
+function dotClass(p) { return p===1?'d1':p===2?'d2':'d3'; }
+function purposeLabel(p) { return p===1?'Praktikum':p===2?'Pelatihan':'Other'; }
+
+// ── server health check ──────────────────────────────────────────────────────
+async function checkServer() {
+  try {
+    const r = await fetch(API + '/api/reservations', { signal: AbortSignal.timeout(2000) });
+    if (r.ok) setOnline(true);
+    else      setOnline(false);
+  } catch { setOnline(false); }
+}
+
+function setOnline(on) {
+  const dot  = document.getElementById('sdot');
+  const span = document.getElementById('sstatus');
+  const warn = document.getElementById('server-warn');
+  dot.className  = 'status-dot ' + (on ? 'online' : 'offline');
+  span.textContent = on ? 'server online' : 'server offline';
+  if (warn) warn.style.display = on ? 'none' : 'block';
+}
+
+// ── login ────────────────────────────────────────────────────────────────────
+function validateNIU(input) {
+  const v = input.value, err = document.getElementById('niu-err');
+  if (v.length > 0 && !/^\d+$/.test(v))  err.textContent = 'Digits only';
+  else if (v.length === 6)                 err.textContent = '';
+  else err.textContent = v.length > 0 ? `${6-v.length} more digit(s)` : '';
+}
+
+function doLogin() {
+  const v = document.getElementById('niu-input').value;
+  if (v.length !== 6 || !/^\d{6}$/.test(v)) {
+    document.getElementById('niu-err').textContent = 'Enter a valid 6-digit NIU'; return;
+  }
+  currentNIU = v;
+  document.getElementById('niu-display').textContent = 'NIU: ' + v;
+  document.getElementById('login-panel').style.display  = 'none';
+  document.getElementById('main-panel').style.display   = 'block';
+  loadAll();
+}
+
+function showLogin() {
+  currentNIU = '';
+  document.getElementById('niu-input').value = '';
+  document.getElementById('niu-err').textContent = '';
+  document.getElementById('login-panel').style.display  = 'block';
+  document.getElementById('main-panel').style.display   = 'none';
+  checkServer();
+}
+
+// ── tabs ─────────────────────────────────────────────────────────────────────
+function switchTab(name, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+  if (name === 'queue')   loadQueue();
+  if (name === 'history') loadHistory();
+}
+
+// ── data loading ─────────────────────────────────────────────────────────────
+async function loadAll() {
+  await Promise.all([loadQueue(), loadHistory(), loadStats()]);
+}
+
+async function loadQueue() {
+  const el = document.getElementById('queue-list');
+  el.innerHTML = '<div class="spinner">Loading…</div>';
+  try {
+    const data = await fetch(API + '/api/reservations').then(r => r.json());
+    // Sort ascending by date then time (server already does this, but be safe)
+    data.sort((a,b) => a.date !== b.date ? a.date.localeCompare(b.date)
+                                         : a.time_start.localeCompare(b.time_start));
+    if (!data.length) { el.innerHTML = '<div class="empty">No upcoming reservations</div>'; return; }
+    el.innerHTML = data.map((r,i) => `
+      <div class="queue-item">
+        <div class="q-num">${i+1}</div>
+        <div>
+          <div class="q-name">${r.group_name}</div>
+          <div class="q-meta"><span class="dot ${dotClass(r.purpose)}"></span>${purposeLabel(r.purpose)} · NIU ${r.niu}</div>
+          <span class="badge ${badgeClass(r.status)}">${r.status}</span>
+        </div>
+        <div class="q-right">
+          <div class="q-time">${r.time_start} – ${r.time_stop}</div>
+          <div class="q-date">${r.date_display}</div>
+          <div class="q-date">${r.duration} mnt</div>
+        </div>
+      </div>`).join('');
+  } catch {
+    el.innerHTML = '<div class="empty">Could not reach server. Is <code>./LabReservationServer</code> running?</div>';
+  }
+}
+
+async function loadHistory() {
+  const el = document.getElementById('history-list');
+  el.innerHTML = '<div class="spinner">Loading…</div>';
+  try {
+    const data = await fetch(`${API}/api/reservations/history?niu=${currentNIU}`).then(r => r.json());
+    // Descending (stack order)
+    data.sort((a,b) => a.date !== b.date ? b.date.localeCompare(a.date)
+                                         : b.time_start.localeCompare(a.time_start));
+    if (!data.length) { el.innerHTML = '<div class="empty">No reservation history for this NIU</div>'; return; }
+    el.innerHTML = `<div class="stack-label"><span class="stack-pill">top of stack</span> most recent first (LIFO)</div>` +
+      data.map(r => `
+        <div class="history-item">
+          <div class="history-header">
+            <div style="font-size:14px;font-weight:500;">${r.group_name}</div>
+            <span class="badge ${badgeClass(r.status)}">${r.status}</span>
+          </div>
+          <div class="history-grid">
+            <div class="hf">Purpose</div><div class="hv">${purposeLabel(r.purpose)}</div>
+            <div class="hf">Date</div><div class="hv">${r.date_display}</div>
+            <div class="hf">Time</div><div class="hv">${r.time_start} – ${r.time_stop}</div>
+            <div class="hf">Duration</div><div class="hv">${r.duration} mnt</div>
+          </div>
+        </div>`).join('');
+  } catch {
+    el.innerHTML = '<div class="empty">Could not load history.</div>';
+  }
+}
+
+async function loadStats() {
+  try {
+    const [queue, all] = await Promise.all([
+      fetch(API + '/api/reservations').then(r => r.json()),
+      fetch(API + '/api/reservations/all').then(r => r.json()),
+    ]);
+    queue.sort((a,b) => a.date !== b.date ? a.date.localeCompare(b.date)
+                                     : a.time_start.localeCompare(b.time_start));
+    const mine     = all.filter(r => r.niu === currentNIU);
+    const accepted = all.filter(r => r.status === 'Accepted').length;
+    document.getElementById('s-queue').textContent    = queue.length;
+    document.getElementById('s-mine').textContent     = mine.length;
+    document.getElementById('s-accepted').textContent = accepted;
+    const nxt = document.getElementById('s-next');
+    if (queue.length > 0) { nxt.textContent = `${queue[0].date_display} ${queue[0].time_start}`; nxt.style.fontSize = '14px'; }
+    else                  { nxt.textContent = '—'; nxt.style.fontSize = '22px'; }
+  } catch { /* stats fail silently */ }
+}
+
+// ── add reservation ──────────────────────────────────────────────────────────
+async function addReservation() {
+  const group    = document.getElementById('f-group').value.trim();
+  const purpose  = parseInt(document.getElementById('f-purpose').value);
+  const date     = document.getElementById('f-date').value;
+  const timeVal  = document.getElementById('f-time').value;
+  const duration = parseInt(document.getElementById('f-duration').value);
+
+  hideAlerts();
+
+  if (!group || !date || !timeVal || !duration || duration <= 0) {
+    showAlert('alert-err', 'Please fill in all fields.');
+    return;
+  }
+
+  const scheduleCheck = validateScheduleNotPassed(date, timeVal);
+  if (!scheduleCheck.ok) {
+    showAlert('alert-err', scheduleCheck.message);
+    return;
+  }
+
+  try {
+    const res = await fetch(API + '/api/reservations', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        niu: currentNIU,
+        group_name: group,
+        purpose,
+        date,
+        time_start: timeVal,
+        duration
+      })
+    });
+
+    if (res.status === 409) { showAlert('alert-conflict'); return; }
+    if (res.status === 400) { showAlert('alert-err', 'Invalid input — check date, time and duration.'); return; }
+    if (!res.ok)            { showAlert('alert-err', 'Server error. Try again.'); return; }
+
+    showAlert('alert-success');
+    clearForm();
+    setTimeout(hideAlerts, 3000);
+    await loadAll();
+
+  } catch {
+    showAlert('alert-err', 'Cannot reach server. Is <code>./LabReservationServer</code> running?');
+  }
+}
+
+function hideAlerts() {
+  ['alert-conflict','alert-success','alert-err'].forEach(id => {
+    document.getElementById(id).style.display = 'none';
+  });
+}
+function showAlert(id, msg) {
+  const el = document.getElementById(id);
+  if (msg) el.innerHTML = msg;
+  el.style.display = 'block';
+}
+function clearForm() {
+  ['f-group','f-date','f-time','f-duration'].forEach(id => document.getElementById(id).value = '');
+}
+
+function applyDateConstraints() {
+  const dateInput = document.getElementById('f-date');
+  if (!dateInput) return;
+  dateInput.min = todayISO();
+}
+
+function wireScheduleValidationHints() {
+  const dateInput = document.getElementById('f-date');
+  const timeInput = document.getElementById('f-time');
+  if (!dateInput || !timeInput) return;
+
+  dateInput.addEventListener('change', () => {
+    if (dateInput.value !== todayISO()) return;
+    if (!timeInput.value) return;
+    const check = validateScheduleNotPassed(dateInput.value, timeInput.value);
+    if (!check.ok) timeInput.value = '';
+  });
+
+  timeInput.addEventListener('change', () => {
+    const check = validateScheduleNotPassed(dateInput.value, timeInput.value);
+    if (!check.ok) showAlert('alert-err', check.message);
+    else if (document.getElementById('alert-err').style.display === 'block') hideAlerts();
+  });
+}
+
+// ── boot ─────────────────────────────────────────────────────────────────────
+applyDateConstraints();
+wireScheduleValidationHints();
+checkServer();
+setInterval(checkServer, 10000);   // re-check every 10 s
+</script>
+</body>
+</html>
